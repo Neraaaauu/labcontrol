@@ -1,5 +1,7 @@
 import os
 import sqlite3
+import datetime
+import decimal
 
 # Intentar importar pymysql para soporte de MariaDB
 try:
@@ -15,6 +17,13 @@ DB_PATH = os.path.join(os.path.dirname(__file__), 'instance', 'labcontrol.db')
 
 # Motor preferido: mariadb por defecto; sqlite como alternativa
 PREFERRED_ENGINE = os.environ.get('DB_ENGINE', 'mariadb').lower()
+
+def _normalize_val(val):
+    if isinstance(val, (datetime.datetime, datetime.date)):
+        return val.strftime('%Y-%m-%d %H:%M:%S' if isinstance(val, datetime.datetime) else '%Y-%m-%d')
+    if isinstance(val, decimal.Decimal):
+        return float(val)
+    return val
 
 class HybridRow(dict):
     """Permite acceder a columnas tanto por nombre (row['nombre']) como por índice numérico (row[0])."""
@@ -56,14 +65,21 @@ class MariaDBCursorWrapper:
         if t is None:
             return None
         col_names = [col[0] for col in self._c.description]
-        return HybridRow(dict(zip(col_names, t)), t)
+        norm_t = tuple(_normalize_val(v) for v in t)
+        norm_d = {k: _normalize_val(v) for k, v in zip(col_names, t)}
+        return HybridRow(norm_d, norm_t)
 
     def fetchall(self):
         tuples = self._c.fetchall()
         if not tuples:
             return []
         col_names = [col[0] for col in self._c.description]
-        return [HybridRow(dict(zip(col_names, t)), t) for t in tuples]
+        rows = []
+        for t in tuples:
+            norm_t = tuple(_normalize_val(v) for v in t)
+            norm_d = {k: _normalize_val(v) for k, v in zip(col_names, t)}
+            rows.append(HybridRow(norm_d, norm_t))
+        return rows
 
     def close(self):
         return self._c.close()

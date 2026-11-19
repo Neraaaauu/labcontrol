@@ -71,7 +71,7 @@
                     </div>
                     <div class="col-md-6">
                         <span class="text-muted small d-block">Fecha y Hora de Solicitud</span>
-                        <span class="text-dark font-tabular">{{ orden.creado_en[:16] }}</span>
+                        <span class="text-dark font-tabular">{{ (orden.creado_en|string)[:16] if orden.creado_en else '' }}</span>
                     </div>
                 </div>
 

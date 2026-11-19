@@ -153,7 +153,7 @@
                         {% endif %}
                     </td>
                     <td class="text-secondary small">{{ o.atendido_por.split('(')[0].strip() }}</td>
-                    <td class="text-muted small font-tabular">{{ o.creado_en[:16] }}</td>
+                    <td class="text-muted small font-tabular">{{ (o.creado_en|string)[:16] if o.creado_en else '' }}</td>
                     <td class="text-end">
                         <a href="{{ url_for('detalle_orden', id=o.id) }}" class="btn btn-sm btn-subtle py-1 px-2" style="font-size: 0.8rem;">
                             Detalle

@@ -48,7 +48,7 @@
             <span class="step-indicator">1</span>
             <div>
                 <div class="step-title">Orden Registrada</div>
-                <div class="step-meta font-tabular">{{ orden.creado_en[:16] }}</div>
+                <div class="step-meta font-tabular">{{ (orden.creado_en|string)[:16] if orden.creado_en else '' }}</div>
             </div>
         </div>
 
@@ -57,7 +57,7 @@
             <div>
                 <div class="step-title">Muestra Recibida</div>
                 <div class="step-meta font-tabular">
-                    {{ orden.fecha_recepcion_muestra[:16] if orden.fecha_recepcion_muestra else 'En espera' }}
+                    {{ (orden.fecha_recepcion_muestra|string)[:16] if orden.fecha_recepcion_muestra else 'En espera' }}
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
             <div>
                 <div class="step-title">Resultados Listos</div>
                 <div class="step-meta font-tabular">
-                    {{ orden.fecha_completada[:16] if orden.fecha_completada else 'Pendiente' }}
+                    {{ (orden.fecha_completada|string)[:16] if orden.fecha_completada else 'Pendiente' }}
                 </div>
             </div>
         </div>
