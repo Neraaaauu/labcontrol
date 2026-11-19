@@ -1,0 +1,52 @@
+/* Estilos personalizados para LabControl */
+
+:root {
+    --bs-primary: #0b5ed7;
+    --bs-primary-rgb: 11, 94, 215;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #2b3035;
+}
+
+.card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.table th {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+}
+
+.badge {
+    font-weight: 600;
+}
+
+/* Indicador de estado de muestra */
+.status-pill {
+    padding: 0.35rem 0.65rem;
+    border-radius: 50rem;
+    font-size: 0.825rem;
+    font-weight: 600;
+}
+
+/* Timeline stepper */
+.stepper-box {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Para impresión de reportes de análisis */
+@media print {
+    nav, footer, .btn, .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: white !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}

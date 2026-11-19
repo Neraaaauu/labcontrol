@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Expediente: {{ paciente.nombre }} {{ paciente.apellido }} - LabControl{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+    <div class="d-flex align-items-center gap-3">
+        <div class="bg-primary-subtle text-primary rounded-circle p-3 fs-3">
+            <i class="bi bi-person-bounding-box"></i>
+        </div>
+        <div>
+            <h2 class="h3 fw-bold mb-0 text-dark">{{ paciente.nombre }} {{ paciente.apellido }}</h2>
+            <div class="text-muted small">
+                Expediente Clínico #{{ paciente.id }} &bull; Registrado el {{ paciente.creado_en[:10] }}
+            </div>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('nueva_orden', paciente_id=paciente.id) }}" class="btn btn-success fw-bold shadow-sm">
+            <i class="bi bi-clipboard-plus-fill me-1"></i> Nueva Orden de Estudio
+        </a>
+        <a href="{{ url_for('editar_paciente', id=paciente.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+        <a href="{{ url_for('lista_pacientes') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Ficha de Datos Generales -->
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-light py-3">
+                <h6 class="fw-bold mb-0 text-secondary"><i class="bi bi-person-lines-fill me-2"></i> Datos Generales</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">CURP:</span>
+                        <span class="font-monospace fw-bold">{{ paciente.curp or 'No asignada' }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Fecha de Nacimiento:</span>
+                        <span class="fw-semibold">{{ paciente.fecha_nacimiento or 'No registrada' }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Sexo Biológico:</span>
+                        <span class="badge bg-secondary-subtle text-dark border">
+                            {% if paciente.sexo == 'M' %}Masculino{% elif paciente.sexo == 'F' %}Femenino{% else %}No especificado{% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Teléfono:</span>
+                        <span><i class="bi bi-telephone text-primary me-1"></i>{{ paciente.telefono or 'Sin teléfono' }}</span>
+                    </li>
+                    <li class="list-group-item px-0 py-2 d-flex justify-content-between">
+                        <span class="text-muted">Correo:</span>
+                        <span class="small">{{ paciente.email or 'Sin correo' }}</span>
+                    </li>
+                </ul>
+
+                <hr>
+
+                <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-geo-alt me-1 text-danger"></i> Domicilio</h6>
+                <div class="small text-muted">
+                    <div>{{ paciente.direccion_calle or 'Calle no especificada' }}</div>
+                    <div>Col. {{ paciente.colonia or 'N/A' }}</div>
+                    <div>C.P. {{ paciente.codigo_postal or 'N/A' }} &bull; {{ paciente.municipio or 'Tijuana' }}, {{ paciente.estado or 'Baja California' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Órdenes y Estudios del Paciente -->
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-secondary">
+                    <i class="bi bi-clock-history me-2 text-primary"></i> Historial de Órdenes y Muestras ({{ ordenes|length }})
+                </h6>
+                <a href="{{ url_for('nueva_orden', paciente_id=paciente.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Generar Orden
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small text-muted text-uppercase">
+                        <tr>
+                            <th>Folio</th>
+                            <th>Fecha</th>
+                            <th>Estudios</th>
+                            <th>Importe</th>
+                            <th>Estado Muestra</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in ordenes %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('detalle_orden', id=o.id) }}" class="fw-bold text-primary text-decoration-none">
+                                    {{ o.codigo_orden }}
+                                </a>
+                            </td>
+                            <td class="small text-muted">{{ o.creado_en[:10] }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ o.num_estudios }} estudio(s)</span></td>
+                            <td class="fw-bold text-success">${{ "%.2f"|format(o.total) }}</td>
+                            <td>
+                                {% if o.estado_orden == 'Pendiente' %}
+                                    <span class="badge bg-warning text-dark">Pendiente Toma</span>
+                                {% elif o.estado_orden == 'Muestra Recibida' %}
+                                    <span class="badge bg-secondary">Muestra Recibida</span>
+                                {% elif o.estado_orden == 'En Análisis' %}
+                                    <span class="badge bg-info text-dark">En Análisis</span>
+                                {% elif o.estado_orden == 'Completada' %}
+                                    <span class="badge bg-success">Completada</span>
+                                {% else %}
+                                    <span class="badge bg-dark">{{ o.estado_orden }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('detalle_orden', id=o.id) }}" class="btn btn-sm btn-outline-primary">
+                                    Ver Detalle
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Este paciente no tiene órdenes registradas todavía.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

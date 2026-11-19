@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Temporales de navegador y perfil
+/tmp/ff_*
