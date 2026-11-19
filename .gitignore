@@ -1,7 +1,10 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Caches y testing
 .pytest_cache/
 .coverage
 htmlcov/
@@ -12,5 +15,20 @@ env/
 venv/
 .venv/
 
-# Temporales de navegador y perfil
+# Base de datos local y sockets
+instance/
+*.db
+*.sqlite
+*.sqlite3
+*.sock
+*.pid
+
+# Configuracion y herramientas de agentes locales
+.gemini/
+.idea/
+.vscode/
+
+# Temporales de SO y navegador
 /tmp/ff_*
+.DS_Store
+Thumbs.db
