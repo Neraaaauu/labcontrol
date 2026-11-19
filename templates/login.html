@@ -1,59 +1,66 @@
 {% extends "base.html" %}
 
-{% block title %}Iniciar Sesión - LabControl{% endblock %}
+{% block title %}Acceso al Sistema - LabControl{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center align-items-center py-5">
-    <div class="col-12 col-md-8 col-lg-5 col-xl-4">
-        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-            <div class="card-header bg-primary text-white text-center py-4">
-                <i class="bi bi-heart-pulse fs-1 text-warning"></i>
-                <h3 class="fw-bold mb-1 mt-2">LabControl</h3>
-                <p class="mb-0 text-white-50 small">Sistema Integral de Laboratorio Clínico</p>
+<div class="row justify-content-center align-items-center py-4 py-md-5">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+        <div class="card card-clinical border-0 shadow-lg overflow-hidden">
+            <div class="p-4 p-md-5 pb-4 text-center border-bottom" style="background-color: #0f172a;">
+                <div class="brand-mark mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.5rem; border-radius: 12px;">
+                    <i class="bi bi-droplet-half"></i>
+                </div>
+                <h1 class="h4 fw-bold text-white mb-1" style="letter-spacing: -0.02em;">LabControl</h1>
+                <p class="text-white-50 small mb-0">Sistema de Trazabilidad y Gestión de Laboratorio Clínico</p>
             </div>
-            <div class="card-body p-4 p-md-4">
-                <h5 class="card-title text-center text-secondary mb-4">Ingreso al Sistema</h5>
 
-                <form method="POST" action="{{ url_for('login') }}">
+            <div class="card-body p-4 p-md-4">
+                <form method="POST" action="{{ url_for('login') }}" class="mb-4">
                     <div class="mb-3">
-                        <label for="username" class="form-label fw-semibold">
-                            <i class="bi bi-person me-1"></i> Usuario
+                        <label for="username" class="form-label small fw-semibold text-muted text-uppercase" style="letter-spacing: 0.05em;">
+                            Nombre de Usuario
                         </label>
-                        <input type="text" class="form-control form-control-lg fs-6" id="username" name="username" placeholder="Ingresa tu usuario" required autofocus>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Ingresa tu usuario" required autofocus>
                     </div>
 
                     <div class="mb-4">
-                        <label for="password" class="form-label fw-semibold">
-                            <i class="bi bi-lock me-1"></i> Contraseña
+                        <label for="password" class="form-label small fw-semibold text-muted text-uppercase" style="letter-spacing: 0.05em;">
+                            Contraseña de Acceso
                         </label>
-                        <input type="password" class="form-control form-control-lg fs-6" id="password" name="password" placeholder="••••••••" required>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm">
+                    <button type="submit" class="btn btn-clinical-primary w-100 py-2 fw-bold">
                         <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
                     </button>
                 </form>
 
-                <!-- Credenciales Rápidas para Demostración y Evaluación -->
-                <div class="mt-4 pt-3 border-top">
-                    <p class="small text-muted text-center mb-2 fw-semibold">
-                        <i class="bi bi-shield-lock me-1"></i> Accesos de Demostración (2 Roles):
-                    </p>
+                <!-- Selección Rápida de Roles para Evaluación -->
+                <div class="pt-3 border-top">
+                    <div class="small fw-bold text-muted text-uppercase mb-2 text-center" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        Accesos de Demostración (2 Roles)
+                    </div>
                     <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-danger text-start d-flex justify-content-between align-items-center" onclick="setDemo('admin', 'admin123')">
-                            <span><i class="bi bi-person-fill-gear me-1"></i> <strong>Admin:</strong> Carlos Méndez (Bioquímico)</span>
-                            <span class="badge bg-danger">admin</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3" onclick="setDemo('admin', 'admin123')">
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.85rem;">QFB. Carlos Méndez</div>
+                                <small class="text-muted" style="font-size: 0.75rem;">admin / admin123</small>
+                            </div>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle text-uppercase" style="font-size: 0.7rem;">Admin</span>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-info text-dark text-start d-flex justify-content-between align-items-center" onclick="setDemo('recepcion', 'recepcion123')">
-                            <span><i class="bi bi-person-badge me-1"></i> <strong>Usuario:</strong> Laura Morales (Recepción)</span>
-                            <span class="badge bg-info text-dark">usuario</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3" onclick="setDemo('recepcion', 'recepcion123')">
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Laura Morales</div>
+                                <small class="text-muted" style="font-size: 0.75rem;">recepcion / recepcion123</small>
+                            </div>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle text-uppercase" style="font-size: 0.7rem;">Usuario</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="mt-4 text-center">
+                <div class="mt-4 pt-2 text-center">
                     <a href="{{ url_for('consultar_codigo') }}" class="small text-decoration-none text-muted">
-                        <i class="bi bi-search me-1"></i> ¿Paciente? Consulta tus resultados con tu código de folio
+                        <i class="bi bi-search me-1"></i> ¿Eres paciente? Consulta tus resultados por código
                     </a>
                 </div>
             </div>
@@ -64,9 +71,9 @@
 
 {% block scripts %}
 <script>
-function setDemo(user, pass) {
-    document.getElementById('username').value = user;
-    document.getElementById('password').value = pass;
+function setDemo(u, p) {
+    document.getElementById('username').value = u;
+    document.getElementById('password').value = p;
 }
 </script>
 {% endblock %}

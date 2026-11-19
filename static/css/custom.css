@@ -1,52 +1,448 @@
-/* Estilos personalizados para LabControl */
+/* ==========================================================================
+   LabControl — Design System (Impeccable Aesthetic & Operate Mode)
+   ========================================================================== */
 
 :root {
-    --bs-primary: #0b5ed7;
-    --bs-primary-rgb: 11, 94, 215;
+  /* Marca e Identidad Clínica */
+  --brand-primary: #0e7490;     /* Deep Teal / Cyan 700 */
+  --brand-accent: #0891b2;      /* Cyan 600 */
+  --brand-hover: #155e75;       /* Cyan 800 */
+  --brand-light: #ecfeff;       /* Cyan 50 */
+  --brand-focus-ring: rgba(8, 145, 178, 0.25);
+
+  /* Superficies y Fondos */
+  --bg-page: #f8fafc;           /* Slate 50 */
+  --bg-surface: #ffffff;        /* Blanco Puro */
+  --bg-subtle: #f1f5f9;         /* Slate 100 */
+  --bg-muted: #e2e8f0;          /* Slate 200 */
+
+  /* Bordes */
+  --border-subtle: #e2e8f0;     /* Slate 200 */
+  --border-default: #cbd5e1;    /* Slate 300 */
+  --border-focus: #0891b2;
+
+  /* Tipografía */
+  --text-main: #0f172a;         /* Slate 900 */
+  --text-muted: #64748b;        /* Slate 500 */
+  --text-subtle: #94a3b8;       /* Slate 400 */
+
+  /* Estados de Muestra Semánticos */
+  --status-pending-text: #92400e;
+  --status-pending-bg: #fef3c7;
+  --status-pending-border: #fde68a;
+
+  --status-received-text: #334155;
+  --status-received-bg: #f1f5f9;
+  --status-received-border: #cbd5e1;
+
+  --status-analysis-text: #075985;
+  --status-analysis-bg: #e0f2fe;
+  --status-analysis-border: #bae6fd;
+
+  --status-complete-text: #065f46;
+  --status-complete-bg: #d1fae5;
+  --status-complete-border: #a7f3d0;
+
+  /* Sombras Direccionales Suaves */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.04);
+}
+
+/* Base y Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f4f6f9;
-    color: #2b3035;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.card {
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+/* Números tabulares para datos clínicos y códigos */
+.font-tabular, .font-monospace, table td, .price-tag, .badge-code {
+  font-variant-numeric: tabular-nums;
 }
 
-.table th {
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
+/* Personalización de selección de texto */
+::selection {
+  background-color: #cffafe;
+  color: #0e7490;
 }
 
-.badge {
-    font-weight: 600;
+/* Scrollbar refinada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-/* Indicador de estado de muestra */
-.status-pill {
-    padding: 0.35rem 0.65rem;
-    border-radius: 50rem;
-    font-size: 0.825rem;
-    font-weight: 600;
+/* ==========================================
+   Barra de Navegación Profesional
+   ========================================== */
+.navbar-clinical {
+  background-color: #0f172a !important; /* Deep Navy Slate */
+  border-bottom: 2px solid var(--brand-accent);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
-/* Timeline stepper */
-.stepper-box {
-    transition: all 0.2s ease-in-out;
+.navbar-clinical .navbar-brand {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
-/* Para impresión de reportes de análisis */
+.navbar-clinical .brand-mark {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+}
+
+.navbar-clinical .nav-link {
+  color: #94a3b8 !important;
+  font-weight: 500;
+  font-size: 0.925rem;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.navbar-clinical .nav-link:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.navbar-clinical .nav-link.active {
+  color: #ffffff !important;
+  background-color: rgba(6, 182, 212, 0.15);
+  font-weight: 600;
+}
+
+.navbar-clinical .user-badge {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+}
+
+/* ==========================================
+   Tarjetas y Superficies
+   ========================================== */
+.card-clinical {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-clinical:hover {
+  border-color: #cbd5e1;
+}
+
+.card-clinical-interactive:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.card-header-clinical {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ==========================================
+   Botones Táctiles Precisos
+   ========================================== */
+.btn-clinical-primary {
+  background-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.55rem 1.15rem;
+  box-shadow: 0 1px 2px 0 rgba(8, 145, 178, 0.2);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-clinical-primary:hover, .btn-clinical-primary:focus {
+  background-color: var(--brand-hover);
+  border-color: var(--brand-hover);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.3);
+}
+
+.btn-clinical-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-clinical-primary:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   Badges de Estado de Muestra (Semánticos)
+   ========================================== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.status-badge-pendiente {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid var(--status-pending-border);
+}
+
+.status-badge-recibida {
+  background-color: var(--status-received-bg);
+  color: var(--status-received-text);
+  border: 1px solid var(--status-received-border);
+}
+
+.status-badge-analisis {
+  background-color: var(--status-analysis-bg);
+  color: var(--status-analysis-text);
+  border: 1px solid var(--status-analysis-border);
+}
+
+.status-badge-completada {
+  background-color: var(--status-complete-bg);
+  color: var(--status-complete-text);
+  border: 1px solid var(--status-complete-border);
+}
+
+/* Indicador de pulso activo para muestras en análisis */
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+  100% { transform: scale(0.9); opacity: 1; }
+}
+
+/* ==========================================
+   Línea de Tiempo / Stepper de Muestras
+   ========================================== */
+.sample-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .sample-stepper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1rem;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.step-card.completed {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.step-card.active {
+  background: #f0f9ff;
+  border-color: #7dd3fc;
+  box-shadow: 0 0 0 1px #0284c7;
+}
+
+.step-card.pending {
+  background: #fafafa;
+  border-color: #e5e5e5;
+  opacity: 0.75;
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-card.completed .step-num {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.step-card.active .step-num {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+.step-card.pending .step-num {
+  background-color: #e2e8f0;
+  color: #64748b;
+}
+
+/* ==========================================
+   Tablas Clínicas Escaneables
+   ========================================== */
+.table-clinical {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-clinical thead th {
+  background-color: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-top: none;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.table-clinical tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table-clinical tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.table-clinical tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 0.925rem;
+}
+
+/* Inputs de Formulario Modernos */
+.form-control, .form-select {
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9375rem;
+  color: var(--text-main);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px var(--brand-focus-ring);
+  outline: none;
+}
+
+/* Tarjetas de Métricas del Dashboard */
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1.15rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.metric-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.metric-card .metric-val {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.metric-card .metric-lbl {
+  font-size: 0.785rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.metric-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+/* Print Styles */
 @media print {
-    nav, footer, .btn, .no-print {
-        display: none !important;
-    }
-    body {
-        background-color: white !important;
-    }
-    .card {
-        border: none !important;
-        box-shadow: none !important;
-    }
+  .navbar-clinical, footer, .btn, .no-print {
+    display: none !important;
+  }
+  body {
+    background-color: #ffffff !important;
+  }
+  .card-clinical {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
 }

@@ -6,100 +6,93 @@
 <!-- Cabecera de la Orden -->
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
     <div class="d-flex align-items-center gap-3">
-        <div class="bg-primary text-white rounded-3 p-3 fs-3">
+        <div class="brand-mark" style="width: 48px; height: 48px; font-size: 1.5rem; border-radius: 12px;">
             <i class="bi bi-file-earmark-medical"></i>
         </div>
         <div>
             <div class="d-flex align-items-center gap-2">
-                <h2 class="h3 fw-bold mb-0 text-dark font-monospace">{{ orden.codigo_orden }}</h2>
+                <h1 class="h3 fw-bold mb-0 text-dark font-monospace">{{ orden.codigo_orden }}</h1>
                 {% if orden.estado_orden == 'Pendiente' %}
-                    <span class="badge bg-warning text-dark fs-6"><i class="bi bi-hourglass-split me-1"></i> Pendiente Toma</span>
+                    <span class="status-badge status-badge-pendiente fs-6"><i class="bi bi-hourglass-split"></i> Pendiente Toma</span>
                 {% elif orden.estado_orden == 'Muestra Recibida' %}
-                    <span class="badge bg-secondary fs-6"><i class="bi bi-droplet-half me-1"></i> Muestra Recibida</span>
+                    <span class="status-badge status-badge-recibida fs-6"><i class="bi bi-droplet-half"></i> Muestra Recibida</span>
                 {% elif orden.estado_orden == 'En Análisis' %}
-                    <span class="badge bg-info text-dark fs-6"><i class="bi bi-gear-wide-connected me-1"></i> En Análisis</span>
+                    <span class="status-badge status-badge-analisis fs-6"><span class="pulse-dot"></span> En Análisis</span>
                 {% elif orden.estado_orden == 'Completada' %}
-                    <span class="badge bg-success fs-6"><i class="bi bi-check2-circle me-1"></i> Completada</span>
+                    <span class="status-badge status-badge-completada fs-6"><i class="bi bi-check2"></i> Completada</span>
                 {% else %}
-                    <span class="badge bg-dark fs-6">{{ orden.estado_orden }}</span>
+                    <span class="status-badge fs-6">{{ orden.estado_orden }}</span>
                 {% endif %}
             </div>
             <div class="text-muted small mt-1">
-                Registrada por <strong>{{ orden.atendido_por }}</strong> el {{ orden.creado_en }}
+                Registrada por <strong>{{ orden.atendido_por }}</strong> el <span class="font-tabular">{{ orden.creado_en }}</span>
             </div>
         </div>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ url_for('consultar_codigo', codigo=orden.codigo_orden) }}" class="btn btn-outline-info text-dark" target="_blank" title="Ver portal público de resultados">
-            <i class="bi bi-box-arrow-up-right me-1"></i> Vista Paciente / Folio
+        <a href="{{ url_for('consultar_codigo', codigo=orden.codigo_orden) }}" class="btn btn-outline-secondary" target="_blank" title="Ver en portal de consulta">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Vista Paciente
         </a>
         <a href="{{ url_for('lista_ordenes') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Volver a Lista
+            <i class="bi bi-arrow-left me-1"></i> Lista
         </a>
     </div>
 </div>
 
-<!-- LÍNEA DE TIEMPO DEL ESTADO DE LA MUESTRA / ORDEN -->
-<div class="card border-0 shadow-sm rounded-3 mb-4">
+<!-- LÍNEA DE TIEMPO DEL ESTADO DE LA MUESTRA / ORDEN (Impeccable Stepper) -->
+<div class="card card-clinical mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold text-secondary text-uppercase small mb-4">
-            <i class="bi bi-activity text-primary me-2"></i> Flujo de Estado de la Muestra y Análisis
-        </h6>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 fw-bold text-dark mb-0">Trazabilidad de la Muestra Biológica</h2>
+            <span class="small text-muted">Control de custodia y estados</span>
+        </div>
 
-        <div class="row text-center position-relative g-3">
+        <div class="sample-stepper">
             <!-- Paso 1 -->
-            <div class="col-6 col-md-3">
-                <div class="p-3 rounded-3 {% if orden.estado_orden in ['Pendiente', 'Muestra Recibida', 'En Análisis', 'Completada'] %}bg-primary text-white shadow-sm{% else %}bg-light text-muted{% endif %}">
-                    <div class="fs-4 mb-1"><i class="bi bi-receipt"></i></div>
-                    <div class="fw-bold small">1. Orden Registrada</div>
-                    <div class="text-white-50 small">{{ orden.creado_en[:16] }}</div>
-                </div>
+            <div class="step-card completed">
+                <span class="step-num">1</span>
+                <div class="fw-bold small text-dark">Orden Registrada</div>
+                <div class="text-muted small font-tabular">{{ orden.creado_en[:16] }}</div>
             </div>
 
             <!-- Paso 2 -->
-            <div class="col-6 col-md-3">
-                <div class="p-3 rounded-3 {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}bg-primary text-white shadow-sm{% elif orden.estado_orden == 'Pendiente' %}bg-warning-subtle text-warning-emphasis border border-warning{% else %}bg-light text-muted{% endif %}">
-                    <div class="fs-4 mb-1"><i class="bi bi-droplet-half"></i></div>
-                    <div class="fw-bold small">2. Muestra Recibida</div>
-                    <div class="small {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}text-white-50{% else %}text-muted{% endif %}">
-                        {{ orden.fecha_recepcion_muestra[:16] if orden.fecha_recepcion_muestra else 'En espera de tubo/frasco' }}
-                    </div>
+            <div class="step-card {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}completed{% else %}active{% endif %}">
+                <span class="step-num">2</span>
+                <div class="fw-bold small text-dark">Muestra Recibida</div>
+                <div class="text-muted small font-tabular">
+                    {{ orden.fecha_recepcion_muestra[:16] if orden.fecha_recepcion_muestra else 'En espera' }}
                 </div>
             </div>
 
             <!-- Paso 3 -->
-            <div class="col-6 col-md-3">
-                <div class="p-3 rounded-3 {% if orden.estado_orden in ['En Análisis', 'Completada'] %}bg-primary text-white shadow-sm{% else %}bg-light text-muted{% endif %}">
-                    <div class="fs-4 mb-1"><i class="bi bi-prescription2"></i></div>
-                    <div class="fw-bold small">3. En Análisis</div>
-                    <div class="small {% if orden.estado_orden in ['En Análisis', 'Completada'] %}text-white-50{% else %}text-muted{% endif %}">
-                        {{ 'Procesando en laboratorio' if orden.estado_orden in ['En Análisis', 'Completada'] else 'En espera' }}
-                    </div>
+            <div class="step-card {% if orden.estado_orden in ['En Análisis', 'Completada'] %}completed{% elif orden.estado_orden == 'Muestra Recibida' %}active{% else %}pending{% endif %}">
+                <span class="step-num">3</span>
+                <div class="fw-bold small text-dark">En Análisis</div>
+                <div class="text-muted small">
+                    {{ 'Procesando en laboratorio' if orden.estado_orden in ['En Análisis', 'Completada'] else 'En cola' }}
                 </div>
             </div>
 
             <!-- Paso 4 -->
-            <div class="col-6 col-md-3">
-                <div class="p-3 rounded-3 {% if orden.estado_orden == 'Completada' %}bg-success text-white shadow-sm{% else %}bg-light text-muted{% endif %}">
-                    <div class="fs-4 mb-1"><i class="bi bi-check2-circle"></i></div>
-                    <div class="fw-bold small">4. Resultados Listos</div>
-                    <div class="small {% if orden.estado_orden == 'Completada' %}text-white-50{% else %}text-muted{% endif %}">
-                        {{ orden.fecha_completada[:16] if orden.fecha_completada else 'Pendiente emisión' }}
-                    </div>
+            <div class="step-card {% if orden.estado_orden == 'Completada' %}completed{% else %}pending{% endif %}">
+                <span class="step-num">4</span>
+                <div class="fw-bold small text-dark">Resultados Listos</div>
+                <div class="text-muted small font-tabular">
+                    {{ orden.fecha_completada[:16] if orden.fecha_completada else 'Pendiente' }}
                 </div>
             </div>
         </div>
 
         <!-- Botones de Acción para Cambiar Estado (Demostración de flujo) -->
         <div class="mt-4 pt-3 border-top d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <span class="small fw-semibold text-secondary">
-                <i class="bi bi-toggles me-1"></i> Transición rápida de estado:
+            <span class="small fw-semibold text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                Transición rápida de estado:
             </span>
             <div class="d-flex flex-wrap gap-2">
                 {% if orden.estado_orden == 'Pendiente' %}
                 <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
                     <input type="hidden" name="nuevo_estado" value="Muestra Recibida">
-                    <button type="submit" class="btn btn-secondary fw-bold">
+                    <button type="submit" class="btn btn-secondary fw-semibold">
                         <i class="bi bi-droplet-half me-1"></i> Marcar Muestra Recibida
                     </button>
                 </form>
@@ -108,7 +101,7 @@
                 {% if orden.estado_orden in ['Pendiente', 'Muestra Recibida'] %}
                 <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
                     <input type="hidden" name="nuevo_estado" value="En Análisis">
-                    <button type="submit" class="btn btn-info text-dark fw-bold">
+                    <button type="submit" class="btn btn-outline-info text-dark fw-semibold">
                         <i class="bi bi-gear-wide-connected me-1"></i> Iniciar Análisis Bioquímico
                     </button>
                 </form>
@@ -117,12 +110,12 @@
                 {% if orden.estado_orden != 'Completada' %}
                 <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
                     <input type="hidden" name="nuevo_estado" value="Completada">
-                    <button type="submit" class="btn btn-success fw-bold">
+                    <button type="submit" class="btn btn-outline-success fw-semibold">
                         <i class="bi bi-check2-circle me-1"></i> Marcar como Completada
                     </button>
                 </form>
                 {% else %}
-                <span class="badge bg-success-subtle text-success p-2">
+                <span class="status-badge status-badge-completada p-2">
                     <i class="bi bi-check-all me-1"></i> Orden cerrada y finalizada con éxito.
                 </span>
                 {% endif %}
@@ -134,18 +127,18 @@
 <div class="row g-4 mb-4">
     <!-- Ficha del Paciente -->
     <div class="col-12 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-light py-3">
-                <h6 class="fw-bold mb-0 text-secondary"><i class="bi bi-person-fill me-2 text-primary"></i> Información del Paciente</h6>
+        <div class="card card-clinical h-100">
+            <div class="card-header-clinical">
+                <h2 class="h6 fw-bold mb-0 text-dark">Información del Paciente</h2>
             </div>
-            <div class="card-body">
-                <h5 class="fw-bold text-dark mb-1">{{ orden.paciente_nombre }}</h5>
-                <div class="text-muted small mb-3">CURP: <span class="font-monospace fw-bold">{{ orden.paciente_curp or 'No disp.' }}</span></div>
+            <div class="card-body p-4">
+                <h3 class="h5 fw-bold text-dark mb-1">{{ orden.paciente_nombre }}</h3>
+                <div class="text-muted small mb-3">CURP: <span class="font-monospace fw-bold">{{ orden.paciente_curp or 'No registrada' }}</span></div>
 
                 <ul class="list-group list-group-flush small">
                     <li class="list-group-item px-0 py-2 d-flex justify-content-between">
                         <span class="text-muted">Teléfono:</span>
-                        <span>{{ orden.paciente_telefono or 'S/T' }}</span>
+                        <span class="font-tabular">{{ orden.paciente_telefono or 'S/T' }}</span>
                     </li>
                     <li class="list-group-item px-0 py-2 d-flex justify-content-between">
                         <span class="text-muted">Correo:</span>
@@ -153,7 +146,7 @@
                     </li>
                     <li class="list-group-item px-0 py-2 d-flex justify-content-between">
                         <span class="text-muted">Sexo / Nacimiento:</span>
-                        <span>{{ orden.paciente_sexo or 'N/E' }} &bull; {{ orden.paciente_nacimiento or 'N/E' }}</span>
+                        <span class="font-tabular">{{ orden.paciente_sexo or 'N/E' }} &bull; {{ orden.paciente_nacimiento or 'N/E' }}</span>
                     </li>
                     <li class="list-group-item px-0 py-2 d-flex justify-content-between">
                         <span class="text-muted">Forma de Pago:</span>
@@ -162,8 +155,9 @@
                 </ul>
 
                 {% if orden.notas_clinicas %}
-                <div class="mt-3 p-2 bg-light rounded border small">
-                    <strong>Notas Clínicas:</strong> {{ orden.notas_clinicas }}
+                <div class="mt-3 p-3 bg-light rounded-3 border small">
+                    <strong class="d-block mb-1 text-dark">Notas Clínicas:</strong>
+                    {{ orden.notas_clinicas }}
                 </div>
                 {% endif %}
             </div>
@@ -172,23 +166,21 @@
 
     <!-- Estudios Solicitados y Captura de Resultados -->
     <div class="col-12 col-lg-8">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold mb-0 text-secondary">
-                    <i class="bi bi-card-checklist me-2 text-primary"></i> Estudios Solicitados en esta Orden ({{ estudios_orden|length }})
-                </h6>
-                <div class="fw-bold text-success fs-5">Total: ${{ "%.2f"|format(orden.total) }} MXN</div>
+        <div class="card card-clinical h-100">
+            <div class="card-header-clinical">
+                <h2 class="h6 fw-bold mb-0 text-dark">Estudios Incluidos en la Orden ({{ estudios_orden|length }})</h2>
+                <div class="fw-bold font-tabular fs-5 text-dark">Total: ${{ "%.2f"|format(orden.total) }} MXN</div>
             </div>
-            <div class="card-body p-3">
+            <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('capturar_resultados', id=orden.id) }}">
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
-                            <thead class="table-light small text-muted">
+                        <table class="table-clinical">
+                            <thead>
                                 <tr>
                                     <th>Estudio / Código</th>
                                     <th>Tipo de Muestra</th>
-                                    <th>Precio</th>
-                                    <th>Resultado / Parámetros Analíticos</th>
+                                    <th class="text-end">Tarifa</th>
+                                    <th>Resultado / Valores Medidos</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,21 +188,21 @@
                                 <tr>
                                     <td>
                                         <div class="fw-bold text-dark">{{ item.nombre }}</div>
-                                        <div class="small text-muted font-monospace">{{ item.codigo }} &bull; {{ item.categoria }}</div>
+                                        <small class="text-muted font-monospace">{{ item.codigo }} &bull; {{ item.categoria }}</small>
                                         {% if item.indicaciones %}
-                                        <div class="small text-secondary fst-italic mt-1"><i class="bi bi-info-circle me-1"></i>{{ item.indicaciones }}</div>
+                                        <div class="small text-muted fst-italic mt-1" style="font-size: 0.8rem;"><i class="bi bi-info-circle me-1"></i>{{ item.indicaciones }}</div>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary-subtle text-secondary border">
-                                            <i class="bi bi-droplet text-danger me-1"></i> {{ item.tipo_muestra }}
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-droplet-half text-danger me-1"></i> {{ item.tipo_muestra }}
                                         </span>
                                     </td>
-                                    <td class="fw-bold text-dark">${{ "%.2f"|format(item.precio_unitario) }}</td>
+                                    <td class="text-end fw-bold font-tabular text-dark">${{ "%.2f"|format(item.precio_unitario) }}</td>
                                     <td style="min-width: 260px;">
-                                        <textarea class="form-control form-control-sm mb-1" name="resultado_{{ item.id }}" rows="2" placeholder="Escribe los resultados o parámetros medidos...">{{ item.resultado_texto or '' }}</textarea>
+                                        <textarea class="form-control form-control-sm mb-1" name="resultado_{{ item.id }}" rows="2" placeholder="Ingresa los hallazgos analíticos...">{{ item.resultado_texto or '' }}</textarea>
                                         {% if item.valores_referencia %}
-                                        <small class="text-muted d-block fst-italic">Ref: {{ item.valores_referencia }}</small>
+                                        <small class="text-muted d-block fst-italic" style="font-size: 0.75rem;">Ref: {{ item.valores_referencia }}</small>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -219,10 +211,10 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center pt-2">
-                        <span class="small text-muted">Los resultados capturados se mostrarán de inmediato en la consulta de folio del paciente.</span>
-                        <button type="submit" class="btn btn-outline-primary btn-sm fw-bold">
-                            <i class="bi bi-save me-1"></i> Guardar Resultados Analíticos
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
+                        <span class="small text-muted">Los resultados guardados se reflejan inmediatamente en el portal público de consulta.</span>
+                        <button type="submit" class="btn btn-clinical-primary btn-sm fw-bold">
+                            <i class="bi bi-save me-1"></i> Guardar Parámetros
                         </button>
                     </div>
                 </form>

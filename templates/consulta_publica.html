@@ -5,40 +5,42 @@
 {% block content %}
 <div class="row justify-content-center py-3">
     <div class="col-12 col-lg-8">
-        <!-- Tarjeta del Buscador por Código -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-            <div class="card-header bg-primary text-white text-center py-4">
-                <i class="bi bi-search fs-1 text-warning mb-2 d-inline-block"></i>
-                <h3 class="fw-bold mb-1">Consulta de Resultados de Laboratorio</h3>
-                <p class="text-white-50 small mb-0">Ingresa el código o folio único impreso en tu comprobante de toma de muestra.</p>
+        <!-- Buscador por Folio Único -->
+        <div class="card card-clinical border-0 shadow-sm overflow-hidden mb-4">
+            <div class="p-4 p-md-5 text-center text-white" style="background-color: #0f172a;">
+                <div class="brand-mark mx-auto mb-3" style="width: 44px; height: 44px; font-size: 1.35rem; border-radius: 10px;">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h1 class="h3 fw-bold mb-1" style="letter-spacing: -0.02em;">Portal de Resultados Clínicos</h1>
+                <p class="text-white-50 small mb-0">Consulta en línea el avance de tu muestra y descarga tus resultados validados.</p>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4 p-md-4">
                 <form method="POST" action="{{ url_for('consultar_codigo') }}" class="mb-3">
                     <div class="input-group input-group-lg">
-                        <span class="input-group-text bg-white"><i class="bi bi-upc-scan text-primary"></i></span>
-                        <input type="text" name="codigo" class="form-control font-monospace text-uppercase" placeholder="Ej. ORD-2026-1001" value="{{ codigo_buscado }}" required autofocus>
-                        <button type="submit" class="btn btn-primary fw-bold px-4">
-                            <i class="bi bi-search me-1"></i> Consultar
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-upc-scan"></i></span>
+                        <input type="text" name="codigo" class="form-control font-monospace text-uppercase border-start-0" placeholder="Ej. ORD-2026-1001" value="{{ codigo_buscado }}" required autofocus>
+                        <button type="submit" class="btn btn-clinical-primary px-4 fw-bold">
+                            Consultar
                         </button>
                     </div>
                 </form>
 
                 <!-- Códigos de Demostración Rápidos -->
-                <div class="bg-light p-3 rounded-3 border">
-                    <span class="small text-muted fw-bold d-block mb-1">
-                        <i class="bi bi-lightbulb text-warning me-1"></i> Códigos de demostración disponibles:
+                <div class="p-3 bg-light rounded-3 border">
+                    <span class="small text-muted fw-bold text-uppercase d-block mb-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                        Folios de prueba para evaluación:
                     </span>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1001') }}" class="badge bg-success text-white text-decoration-none p-2">
+                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1001') }}" class="status-badge status-badge-completada text-decoration-none">
                             ORD-2026-1001 (Completada con Resultados)
                         </a>
-                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1002') }}" class="badge bg-info text-dark text-decoration-none p-2">
+                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1002') }}" class="status-badge status-badge-analisis text-decoration-none">
                             ORD-2026-1002 (En Análisis)
                         </a>
-                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1003') }}" class="badge bg-secondary text-white text-decoration-none p-2">
+                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1003') }}" class="status-badge status-badge-recibida text-decoration-none">
                             ORD-2026-1003 (Muestra Recibida)
                         </a>
-                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1004') }}" class="badge bg-warning text-dark text-decoration-none p-2">
+                        <a href="{{ url_for('consultar_codigo', codigo='ORD-2026-1004') }}" class="status-badge status-badge-pendiente text-decoration-none">
                             ORD-2026-1004 (Pendiente Toma)
                         </a>
                     </div>
@@ -46,61 +48,63 @@
             </div>
         </div>
 
-        <!-- Resultados de la Búsqueda -->
+        <!-- Ficha de Resultados Localizada -->
         {% if orden %}
-        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <div class="card card-clinical border-0 shadow-md overflow-hidden">
+            <div class="card-header-clinical bg-white py-3">
                 <div>
-                    <span class="text-muted small text-uppercase fw-bold">Folio de Orden:</span>
-                    <h4 class="fw-bold text-primary font-monospace mb-0">{{ orden.codigo_orden }}</h4>
+                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.05em;">Folio de Solicitud:</small>
+                    <div class="h4 fw-bold font-monospace mb-0 text-dark">{{ orden.codigo_orden }}</div>
                 </div>
                 <div>
                     {% if orden.estado_orden == 'Pendiente' %}
-                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-hourglass-split me-1"></i> Pendiente Toma de Muestra</span>
+                        <span class="status-badge status-badge-pendiente fs-6"><i class="bi bi-hourglass-split"></i> Pendiente Toma</span>
                     {% elif orden.estado_orden == 'Muestra Recibida' %}
-                        <span class="badge bg-secondary fs-6"><i class="bi bi-droplet-half me-1"></i> Muestra Recibida en Lab</span>
+                        <span class="status-badge status-badge-recibida fs-6"><i class="bi bi-droplet-half"></i> Muestra en Laboratorio</span>
                     {% elif orden.estado_orden == 'En Análisis' %}
-                        <span class="badge bg-info text-dark fs-6"><i class="bi bi-gear-wide-connected me-1"></i> En Análisis Bioquímico</span>
+                        <span class="status-badge status-badge-analisis fs-6"><span class="pulse-dot"></span> En Análisis Clínico</span>
                     {% elif orden.estado_orden == 'Completada' %}
-                        <span class="badge bg-success fs-6"><i class="bi bi-check2-circle me-1"></i> Resultados Listos para Entrega</span>
+                        <span class="status-badge status-badge-completada fs-6"><i class="bi bi-check2"></i> Resultados Listos</span>
                     {% else %}
-                        <span class="badge bg-dark fs-6">{{ orden.estado_orden }}</span>
+                        <span class="status-badge fs-6">{{ orden.estado_orden }}</span>
                     {% endif %}
                 </div>
             </div>
             <div class="card-body p-4">
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-4 pb-3 border-bottom">
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Paciente:</small>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Paciente:</small>
                         <strong class="fs-5 text-dark">{{ orden.paciente_nombre }}</strong>
                     </div>
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Fecha de Solicitud:</small>
-                        <strong class="text-dark">{{ orden.creado_en[:16] }}</strong>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">Fecha y Hora de Solicitud:</small>
+                        <strong class="text-dark font-tabular">{{ orden.creado_en[:16] }}</strong>
                     </div>
                 </div>
 
-                <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-clipboard2-check me-2 text-primary"></i> Estudios Solicitados</h6>
+                <h2 class="h6 fw-bold text-dark mb-3">Estudios y Resultados Analíticos</h2>
 
-                <div class="list-group mb-4">
+                <div class="list-group list-group-flush border rounded-3 mb-4 overflow-hidden">
                     {% for est in estudios %}
                     <div class="list-group-item p-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 class="fw-bold mb-0 text-dark">{{ est.nombre }}</h6>
-                            <span class="badge bg-light text-dark border">{{ est.tipo_muestra }}</span>
+                            <div class="fw-bold text-dark">{{ est.nombre }}</div>
+                            <span class="badge bg-light text-muted border">{{ est.tipo_muestra }}</span>
                         </div>
 
                         {% if est.resultado_texto %}
-                        <div class="mt-2 p-3 bg-success-subtle text-success-emphasis rounded border border-success-subtle">
-                            <div class="fw-bold small text-uppercase mb-1"><i class="bi bi-file-earmark-check me-1"></i> Resultado de Análisis:</div>
-                            <div class="fw-semibold">{{ est.resultado_texto }}</div>
+                        <div class="mt-2 p-3 rounded-3 border" style="background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                            <div class="small fw-bold text-success text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 0.04em;">
+                                <i class="bi bi-file-earmark-check me-1"></i> Parámetros Analíticos Validados:
+                            </div>
+                            <div class="fw-semibold text-dark font-tabular" style="font-size: 0.95rem;">{{ est.resultado_texto }}</div>
                             {% if est.valores_referencia %}
-                            <small class="d-block text-muted mt-1">Valores de referencia esperados: {{ est.valores_referencia }}</small>
+                            <small class="d-block text-muted mt-1 fst-italic" style="font-size: 0.8rem;">Rangos de Referencia: {{ est.valores_referencia }}</small>
                             {% endif %}
                         </div>
                         {% else %}
                         <div class="mt-2 small text-muted fst-italic">
-                            <i class="bi bi-clock me-1"></i> Resultados en proceso de análisis clínico por el área bioquímica.
+                            <i class="bi bi-hourglass-split me-1"></i> Análisis en proceso bioquímico por el personal del laboratorio.
                         </div>
                         {% endif %}
                     </div>
@@ -108,17 +112,19 @@
                 </div>
 
                 {% if orden.estado_orden == 'Completada' %}
-                <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
-                    <i class="bi bi-shield-check fs-4"></i>
-                    <div>
-                        <strong>Estudios validados:</strong> Los resultados analíticos han sido liberados por el personal de laboratorio.
+                <div class="p-3 rounded-3 d-flex align-items-center gap-3 border" style="background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                    <i class="bi bi-shield-check fs-3 text-success"></i>
+                    <div class="small">
+                        <strong class="d-block text-dark">Estudios concluidos y autorizados.</strong>
+                        Los resultados fueron revisados y validados por el químico responsable. Puedes guardarlos o imprimirlos para tu médico.
                     </div>
                 </div>
                 {% else %}
-                <div class="alert alert-info d-flex align-items-center gap-2 mb-0" role="alert">
-                    <i class="bi bi-info-circle fs-4"></i>
-                    <div>
-                        Tu muestra se encuentra en fase: <strong>{{ orden.estado_orden }}</strong>. Te notificaremos una vez concluido el análisis.
+                <div class="p-3 rounded-3 d-flex align-items-center gap-3 border bg-light">
+                    <i class="bi bi-info-circle fs-3 text-primary"></i>
+                    <div class="small">
+                        <strong class="d-block text-dark">Muestra en proceso de laboratorio.</strong>
+                        Estado actual: <strong>{{ orden.estado_orden }}</strong>. Tus resultados estarán listos en el tiempo estipulado.
                     </div>
                 </div>
                 {% endif %}
