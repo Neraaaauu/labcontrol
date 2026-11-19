@@ -179,8 +179,8 @@ def build_pdf():
         [Paragraph("<b>Materia y Fase:</b>", table_cell), Paragraph("Herramientas de Desarrollo de Software &bull; <b>Avance 2 (Prototipo Funcional)</b>", table_cell)],
         [Paragraph("<b>Sistema Desarrollado:</b>", table_cell), Paragraph("Opción 1: <b>LabControl</b> (Gestión de Pacientes, Órdenes, Catálogo y Muestras)", table_cell)],
         [Paragraph("<b>Integrantes:</b>", table_cell), Paragraph("Adrian Gómez / Equipo de Desarrollo HDS", table_cell)],
-        [Paragraph("<b>Base de Datos y Framework:</b>", table_cell), Paragraph("<b>MariaDB (Linux)</b> / Fallback SQLite &bull; <b>Flask 3.1.3 (Python 3.12)</b> &bull; Bootstrap 5 (Natural UI)", table_cell)],
-        [Paragraph("<b>Estado del Entregable:</b>", table_cell), Paragraph("<b>100% Operativo</b>: Software ejecutable con BD, login, 2 roles, 2 módulos y API.", table_cell)]
+        [Paragraph("<b>Base de Datos y Framework:</b>", table_cell), Paragraph("<b>MariaDB 10.11+ (Linux mariadb-user)</b> &bull; Fallback SQLite &bull; <b>Flask 3.1.3</b>", table_cell)],
+        [Paragraph("<b>Estado del Entregable:</b>", table_cell), Paragraph("<b>100% Operativo</b>: Software ejecutable con MariaDB, login, 2 roles, 2 módulos y API.", table_cell)]
     ]
     t_meta = Table(meta_data, colWidths=[150, 372])
     t_meta.setStyle(TableStyle([
@@ -209,11 +209,13 @@ def build_pdf():
     ))
 
     # 2. Arquitectura de Base de Datos y Persistencia
-    story.append(Paragraph("2. Arquitectura de Base de Datos y Persistencia", h1_style))
+    story.append(Paragraph("2. Arquitectura de Base de Datos y Persistencia en MariaDB", h1_style))
     story.append(Paragraph(
-        "El sistema opera de forma nativa sobre <b>MariaDB 10.11+</b> en Linux mediante el servicio de usuario <code>mariadb-user</code> "
-        "y el conector <code>pymysql</code>, contando además con un mecanismo de fallback transparente a <b>SQLite3</b>. "
-        "El esquema relacional garantiza consistencia estricta mediante restricciones de claves foráneas (<code>FOREIGN KEY</code>) con integridad referencial:",
+        "El sistema opera de forma nativa sobre el gestor relacional <b>MariaDB 10.11+</b> en Linux mediante el servicio de usuario "
+        "<code>mariadb-user</code> (conexión directa por socket UNIX con <code>pymysql</code>). El modelo de datos estructurado en la base "
+        "<code>labcontrol</code> garantiza consistencia e integridad referencial estricta mediante restricciones de claves foráneas "
+        "(<code>FOREIGN KEY ON DELETE CASCADE / RESTRICT</code>) e índices únicos sobre CURP, usuarios y códigos de órdenes. "
+        "Adicionalmente, se incluye un mecanismo de compatibilidad y fallback transparente a <b>SQLite3</b> para portabilidad:",
         body_style
     ))
 
@@ -241,7 +243,7 @@ def build_pdf():
     img_diag = os.path.join(SCREENSHOTS_DIR, "00_esquema_base_datos.png")
     if os.path.exists(img_diag):
         story.append(Image(img_diag, width=470, height=240))
-        story.append(Paragraph("Figura 2.1: Esquema Relacional de Base de Datos de LabControl", caption_style))
+        story.append(Paragraph("Figura 2.1: Esquema Relacional de Base de Datos en MariaDB (InnoDB)", caption_style))
 
     # 3. Módulo de Autenticación y 2 Roles
     story.append(Paragraph("3. Módulo de Autenticación y Control de Acceso por Roles", h1_style))
@@ -335,8 +337,10 @@ def build_pdf():
     # 9. Guía de Ejecución Local
     story.append(Paragraph("9. Guía de Ejecución Local para Evaluación", h1_style))
     story.append(Paragraph(
-        "El proyecto se ejecuta en cualquier equipo Linux/UNIX con Python 3:<br/>"
+        "El proyecto se ejecuta en Linux con MariaDB y Python 3:<br/>"
         "&bull; <b>Directorio:</b> <code>cd /home/adrian/proyectos/labcontrol</code><br/>"
+        "&bull; <b>Servicio MariaDB:</b> <code>systemctl --user start mariadb-user</code><br/>"
+        "&bull; <b>Inicializar BD:</b> <code>python3 seed_data.py</code><br/>"
         "&bull; <b>Iniciar Servidor:</b> <code>./run.sh</code> o <code>python3 app.py</code> (URL: <code>http://127.0.0.1:5000</code>)<br/>"
         "&bull; <b>Credenciales:</b> Admin: <code>admin</code> / <code>admin123</code> &bull; Usuario: <code>recepcion</code> / <code>recepcion123</code><br/>"
         "&bull; <b>Ejecutar Pruebas:</b> <code>pytest -v</code>",

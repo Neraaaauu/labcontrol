@@ -87,11 +87,11 @@ Para evaluar la demostración solicitada por la materia:
 ```text
 labcontrol/
 ├── app.py                     # Controlador central Flask, rutas, sesiones y decoradores de rol
-├── database.py                # Conexión SQLite3, PRAGMA foreign_keys y esquema relacional
+├── database.py                # Capa de datos MariaDB (Linux) / Fallback SQLite y esquema relacional
 ├── seed_data.py               # Generador de datos semilla ficticios realistas
-├── run.sh                     # Script ejecutable de inicio rápido
+├── run.sh                     # Script ejecutable de inicio rápido (inicia MariaDB y servidor)
 ├── instance/
-│   └── labcontrol.db          # Base de datos SQLite relacional
+│   └── labcontrol.db          # Respaldo portable SQLite relacional
 ├── templates/                 # Vistas Jinja2 responsivas con Bootstrap 5
 │   ├── base.html              # Plantilla base con navbar y notificaciones flash
 │   ├── login.html             # Pantalla de acceso con botones demo de rol

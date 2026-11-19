@@ -15,7 +15,7 @@
   * Prioridad: Claridad, tranquilidad para el paciente, visualización limpia de parámetros y valores de referencia sin tecnicismos innecesarios.
 
 ## 4. Requisitos Clave y Restricciones
-* Base de datos SQLite relacional con llaves foráneas.
+* Base de datos MariaDB 10.11+ relacional con llaves foráneas e integridad referencial (fallback SQLite).
 * Control de acceso basado en 2 roles (`admin` y `usuario`).
 * Flujo de trabajo clínico estricto: `Registro de Paciente → Creación de Orden → Recepción de Muestra → Análisis Bioquímico → Resultados Listos`.
 * Tolerancia a fallos: La API de Código Postal jamás bloquea la captura manual.

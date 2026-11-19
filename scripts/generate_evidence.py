@@ -67,7 +67,7 @@ def render_database_diagram(output_path):
     font_col_type = ImageFont.truetype(FONT_PATH, 11)
 
     # Título
-    draw.text((40, 25), "ESQUEMA RELACIONAL DE BASE DE DATOS - LABCONTROL (SQLite)", fill=(20, 40, 80), font=font_title)
+    draw.text((40, 25), "ESQUEMA RELACIONAL DE BASE DE DATOS - LABCONTROL (MariaDB)", fill=(20, 40, 80), font=font_title)
     draw.line([(40, 60), (1160, 60)], fill=(200, 210, 225), width=2)
 
     tables = [
@@ -76,12 +76,12 @@ def render_database_diagram(output_path):
             "x": 40, "y": 80, "w": 340, "h": 220,
             "header_bg": (13, 110, 253),
             "columns": [
-                ("id (PK)", "INTEGER AUTOINCREMENT", True),
-                ("username", "TEXT UNIQUE NOT NULL", False),
-                ("password_hash", "TEXT NOT NULL", False),
-                ("nombre_completo", "TEXT NOT NULL", False),
-                ("rol", "TEXT ('admin' | 'usuario')", False),
-                ("activo", "INTEGER DEFAULT 1", False),
+                ("id (PK)", "INT AUTO_INCREMENT", True),
+                ("username", "VARCHAR(80) UNIQUE NOT NULL", False),
+                ("password_hash", "VARCHAR(255) NOT NULL", False),
+                ("nombre_completo", "VARCHAR(120) NOT NULL", False),
+                ("rol", "VARCHAR(20) ('admin'|'usuario')", False),
+                ("activo", "TINYINT DEFAULT 1", False),
                 ("creado_en", "TIMESTAMP DEFAULT CURRENT", False)
             ]
         },
@@ -90,18 +90,18 @@ def render_database_diagram(output_path):
             "x": 40, "y": 340, "w": 340, "h": 360,
             "header_bg": (13, 110, 253),
             "columns": [
-                ("id (PK)", "INTEGER AUTOINCREMENT", True),
-                ("nombre", "TEXT NOT NULL", False),
-                ("apellido", "TEXT NOT NULL", False),
-                ("curp", "TEXT UNIQUE", False),
+                ("id (PK)", "INT AUTO_INCREMENT", True),
+                ("nombre", "VARCHAR(100) NOT NULL", False),
+                ("apellido", "VARCHAR(100) NOT NULL", False),
+                ("curp", "VARCHAR(18) UNIQUE", False),
                 ("fecha_nacimiento", "DATE", False),
-                ("sexo", "TEXT ('M' | 'F' | 'O')", False),
-                ("telefono", "TEXT", False),
-                ("email", "TEXT", False),
-                ("codigo_postal", "TEXT (API Externa)", False),
-                ("colonia", "TEXT", False),
-                ("municipio", "TEXT", False),
-                ("estado", "TEXT", False),
+                ("sexo", "VARCHAR(1) ('M' | 'F' | 'O')", False),
+                ("telefono", "VARCHAR(20)", False),
+                ("email", "VARCHAR(120)", False),
+                ("codigo_postal", "VARCHAR(10) (API Externa)", False),
+                ("colonia", "VARCHAR(100)", False),
+                ("municipio", "VARCHAR(100)", False),
+                ("estado", "VARCHAR(100)", False),
                 ("direccion_calle", "TEXT", False),
                 ("creado_en", "TIMESTAMP DEFAULT CURRENT", False)
             ]
@@ -111,13 +111,13 @@ def render_database_diagram(output_path):
             "x": 440, "y": 140, "w": 350, "h": 380,
             "header_bg": (25, 135, 84),
             "columns": [
-                ("id (PK)", "INTEGER AUTOINCREMENT", True),
-                ("codigo_orden", "TEXT UNIQUE (ORD-XXXX)", False),
-                ("paciente_id (FK)", "INTEGER -> pacientes(id)", True),
-                ("usuario_id (FK)", "INTEGER -> usuarios(id)", True),
-                ("estado_orden", "TEXT (Pendiente/Recibida/etc)", False),
-                ("total", "REAL NOT NULL DEFAULT 0.0", False),
-                ("metodo_pago", "TEXT DEFAULT 'Efectivo'", False),
+                ("id (PK)", "INT AUTO_INCREMENT", True),
+                ("codigo_orden", "VARCHAR(20) UNIQUE (ORD-XXXX)", False),
+                ("paciente_id (FK)", "INT -> pacientes(id)", True),
+                ("usuario_id (FK)", "INT -> usuarios(id)", True),
+                ("estado_orden", "VARCHAR(30)", False),
+                ("total", "DECIMAL(10,2) DEFAULT 0.00", False),
+                ("metodo_pago", "VARCHAR(50) DEFAULT 'Efectivo'", False),
                 ("notas_clinicas", "TEXT", False),
                 ("fecha_toma_muestra", "TIMESTAMP", False),
                 ("fecha_recepcion_muestra", "TIMESTAMP", False),
@@ -130,11 +130,11 @@ def render_database_diagram(output_path):
             "x": 840, "y": 110, "w": 320, "h": 240,
             "header_bg": (108, 117, 125),
             "columns": [
-                ("id (PK)", "INTEGER AUTOINCREMENT", True),
-                ("orden_id (FK)", "INTEGER -> ordenes(id)", True),
-                ("estudio_id (FK)", "INTEGER -> estudios(id)", True),
-                ("precio_unitario", "REAL NOT NULL", False),
-                ("estado_estudio", "TEXT DEFAULT 'Pendiente'", False),
+                ("id (PK)", "INT AUTO_INCREMENT", True),
+                ("orden_id (FK)", "INT -> ordenes(id)", True),
+                ("estudio_id (FK)", "INT -> estudios(id)", True),
+                ("precio_unitario", "DECIMAL(10,2) NOT NULL", False),
+                ("estado_estudio", "VARCHAR(30) DEFAULT 'Pendiente'", False),
                 ("resultado_texto", "TEXT", False),
                 ("valores_referencia", "TEXT", False)
             ]
@@ -144,16 +144,16 @@ def render_database_diagram(output_path):
             "x": 840, "y": 410, "w": 320, "h": 300,
             "header_bg": (13, 110, 253),
             "columns": [
-                ("id (PK)", "INTEGER AUTOINCREMENT", True),
-                ("codigo", "TEXT UNIQUE NOT NULL", False),
-                ("nombre", "TEXT NOT NULL", False),
-                ("categoria", "TEXT NOT NULL", False),
+                ("id (PK)", "INT AUTO_INCREMENT", True),
+                ("codigo", "VARCHAR(20) UNIQUE NOT NULL", False),
+                ("nombre", "VARCHAR(120) NOT NULL", False),
+                ("categoria", "VARCHAR(60) NOT NULL", False),
                 ("descripcion", "TEXT", False),
-                ("tipo_muestra", "TEXT NOT NULL", False),
+                ("tipo_muestra", "VARCHAR(60) NOT NULL", False),
                 ("indicaciones", "TEXT", False),
-                ("precio", "REAL NOT NULL", False),
-                ("tiempo_entrega_hrs", "INTEGER DEFAULT 24", False),
-                ("activo", "INTEGER DEFAULT 1", False)
+                ("precio", "DECIMAL(10,2) NOT NULL", False),
+                ("tiempo_entrega_hrs", "INT DEFAULT 24", False),
+                ("activo", "TINYINT DEFAULT 1", False)
             ]
         }
     ]
@@ -192,7 +192,7 @@ def render_database_diagram(output_path):
     draw.polygon([(996, 355), (1000, 347), (1004, 355)], fill=(13, 110, 253))
 
     # Pie con leyenda
-    draw.text((40, 725), "Llaves: (PK) Primary Key | (FK) Foreign Key con integridad referencial | SQLite3 relacional con PRAGMA foreign_keys = ON", fill=(100, 100, 100), font=font_col_type)
+    draw.text((40, 725), "Llaves: (PK) Primary Key | (FK) Foreign Key con integridad referencial | MariaDB 10.11+ Motor Relacional InnoDB (Linux)", fill=(100, 100, 100), font=font_col_type)
 
     img.save(output_path, "PNG")
     print(f"Diagrama de base de datos generado en: {output_path}")

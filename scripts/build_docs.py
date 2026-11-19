@@ -142,7 +142,7 @@ def build_avance_1():
         ("Materia y Entrega:", "Herramientas de Desarrollo de Software - Avance 1 (Análisis y Diseño)"),
         ("Sistema Seleccionado:", "Opción 1: LabControl | Gestión de Solicitudes y Muestras de Laboratorio Clínico"),
         ("Integrantes:", "Adrian Gómez / Equipo de Desarrollo HDS"),
-        ("Tecnologías Principales:", "Python 3.12, Flask 3.1, SQLite3 Relacional, Jinja2, Bootstrap 5, API Zippopotam/SEPOMEX")
+        ("Tecnologías Principales:", "Python 3.12, Flask 3.1, MariaDB 10.11+ Relacional (Linux), Jinja2, Bootstrap 5, API Zippopotam/SEPOMEX")
     ]
     for row_idx, (k, v) in enumerate(meta_info):
         c0 = table_meta.cell(row_idx, 0)
@@ -185,9 +185,9 @@ def build_avance_1():
     add_heading_1(doc, "3. Framework Elegido y Justificación Técnica")
     add_paragraph(doc, 
         "Se eligió Python con el microframework Flask (v3.1.3) por su arquitectura limpia, ligera y altamente mantenible, "
-        "cumpliendo con creces los requerimientos del curso. Se utiliza SQLite3 con la directiva 'PRAGMA foreign_keys = ON' para garantizar "
-        "integridad referencial entre pacientes, usuarios, órdenes y estudios. En la capa de presentación se emplea Jinja2 y Bootstrap 5 "
-        "para una interfaz responsive, accesible y profesional adaptada al entorno clínico.",
+        "cumpliendo con creces los requerimientos del curso. Se utiliza MariaDB 10.11+ como motor relacional primario (con servicio mariadb-user en Linux) "
+        "garantizando integridad referencial estricta mediante restricciones FOREIGN KEY entre pacientes, usuarios, órdenes y estudios. "
+        "En la capa de presentación se emplea Jinja2 y Bootstrap 5 para una interfaz responsive, accesible y profesional adaptada al entorno clínico.",
         bold_prefix="Stack Tecnológico: ")
 
     # 4. Esquema de Base de Datos
@@ -209,7 +209,7 @@ def build_avance_1():
         doc.add_picture(diagram_path, width=Inches(5.8))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 1.1: Diagrama Entidad-Relación de LabControl (SQLite3)")
+        r_cap = p_cap.add_run("Figura 1.1: Diagrama Entidad-Relación de LabControl (MariaDB)")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -265,14 +265,15 @@ def build_avance_2():
     r_tit.font.color.rgb = COLOR_DARK
 
     # Tabla de metadatos
-    table_meta = doc.add_table(rows=5, cols=2)
+    table_meta = doc.add_table(rows=6, cols=2)
     set_table_borders(table_meta)
     meta_info = [
         ("Materia y Fase:", "Herramientas de Desarrollo de Software - Avance 2 (Prototipo Funcional)"),
         ("Sistema Desarrollado:", "LabControl (Gestión de Pacientes, Órdenes, Catálogo y Muestras de Laboratorio)"),
         ("Integrantes:", "Adrian Gómez / Equipo de Desarrollo HDS"),
+        ("Base de Datos y Framework:", "MariaDB 10.11+ (Linux mariadb-user) / Fallback SQLite | Flask 3.1.3"),
         ("Fecha de Entrega:", "Miércoles 18 de noviembre de 2026"),
-        ("Estado del Avance:", "100% Cumplido: Software ejecutable, BD, 2 roles, 2 módulos y API integrados.")
+        ("Estado del Avance:", "100% Cumplido: Software ejecutable con MariaDB, 2 roles, 2 módulos y API integrados.")
     ]
     for row_idx, (k, v) in enumerate(meta_info):
         c0 = table_meta.cell(row_idx, 0)
@@ -298,16 +299,19 @@ def build_avance_2():
         "login, 2 roles, 2 módulos principales y formularios básicos. Mostrar el avance funcionando'), se ha desarrollado "
         "una versión de software plenamente operativa y ejecutable localmente para el sistema LabControl. "
         "A diferencia de un boceto o conjunto de imágenes estáticas, el sistema cuenta con servidor backend en Flask, "
-        "base de datos relacional SQLite inicializada con datos semilla ficticios realistas, autenticación robusta mediante sesiones cifradas, "
-        "control de acceso basado en roles (Administrador y Usuario Recepcionista), integración de API externa para domicilios "
-        "y un flujo completo de captura, cálculo y cambio de estados de muestras clínicas.",
+        "base de datos relacional MariaDB (base de datos 'labcontrol' en Linux) inicializada con datos semilla ficticios realistas, "
+        "autenticación robusta mediante sesiones cifradas, control de acceso basado en roles (Administrador y Usuario Recepcionista), "
+        "integración de API externa para domicilios y un flujo completo de captura, cálculo y cambio de estados de muestras clínicas.",
         bold_prefix="Logro del Avance: ")
 
     # 2. Arquitectura de Base de Datos y Persistencia
-    add_heading_1(doc, "2. Arquitectura de Base de Datos y Modelo de Datos")
+    add_heading_1(doc, "2. Arquitectura de Base de Datos y Persistencia en MariaDB")
     add_paragraph(doc, 
-        "Se implementó una base de datos relacional SQLite ubicada en 'instance/labcontrol.db'. La arquitectura asegura "
-        "la consistencia mediante claves foráneas obligatorias (PRAGMA foreign_keys = ON) y restricciones CHECK para estados y roles.")
+        "El sistema opera de forma nativa sobre el gestor de base de datos relacional MariaDB 10.11+ en Linux "
+        "(ejecutado mediante el servicio 'systemctl --user start mariadb-user' y conectado vía socket UNIX con PyMySQL). "
+        "El modelo relacional garantiza integridad referencial absoluta mediante restricciones de claves foráneas "
+        "(FOREIGN KEY ON DELETE RESTRICT / CASCADE) e índices únicos sobre CURP, username y folios de órdenes. "
+        "Asimismo, se incluye una capa de abstracción con fallback transparente a SQLite3 para máxima portabilidad:")
     
     table_db = doc.add_table(rows=6, cols=3)
     set_table_borders(table_db)
@@ -343,6 +347,20 @@ def build_avance_2():
 
     add_paragraph(doc, "El script 'seed_data.py' inicializa de manera automática la base de datos con cuentas de prueba, 8 estudios representativos, 5 pacientes y 4 órdenes en diferentes fases de avance.", bold_prefix="Carga de Datos Semilla: ")
 
+    diagram_path = os.path.join(SCREENSHOTS_DIR, "00_esquema_base_datos.png")
+    if os.path.exists(diagram_path):
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.paragraph_format.space_before = Pt(4)
+        p_img.paragraph_format.space_after = Pt(2)
+        doc.add_picture(diagram_path, width=Inches(5.8))
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r_cap = p_cap.add_run("Figura 2.1: Esquema Relacional de Base de Datos en MariaDB (InnoDB)")
+        r_cap.font.size = Pt(8.5)
+        r_cap.font.italic = True
+        r_cap.font.color.rgb = COLOR_GRAY
+
     # 3. Módulo de Autenticación y 2 Roles
     add_heading_1(doc, "3. Módulo de Autenticación y Control de Acceso por Roles")
     add_paragraph(doc, 
@@ -358,7 +376,7 @@ def build_avance_2():
         doc.add_picture(img_login, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.1: Pantalla de inicio de sesión con botones de prueba para los 2 roles")
+        r_cap = p_cap.add_run("Figura 2.2: Pantalla de inicio de sesión con botones de prueba para los 2 roles")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -384,7 +402,7 @@ def build_avance_2():
         doc.add_picture(img_pac, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.2: Formulario de alta de paciente con autocompletado mediante API de Código Postal")
+        r_cap = p_cap.add_run("Figura 2.3: Formulario de alta de paciente con autocompletado mediante API de Código Postal")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -404,7 +422,7 @@ def build_avance_2():
         doc.add_picture(img_orden_nueva, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.3: Formulario de creación de orden con cálculo automático y selección de estudios")
+        r_cap = p_cap.add_run("Figura 2.4: Formulario de creación de orden con cálculo automático y selección de estudios")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -427,7 +445,7 @@ def build_avance_2():
         doc.add_picture(img_orden_det, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.4: Vista de seguimiento de orden con stepper de estados y captura de resultados analíticos")
+        r_cap = p_cap.add_run("Figura 2.5: Vista de seguimiento de orden con stepper de estados y captura de resultados analíticos")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -448,7 +466,7 @@ def build_avance_2():
         doc.add_picture(img_pub, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.5: Apartado de consulta de análisis clínicos mediante código de folio")
+        r_cap = p_cap.add_run("Figura 2.6: Apartado de consulta de análisis clínicos mediante código de folio")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -475,7 +493,7 @@ def build_avance_2():
         doc.add_picture(img_pytest, width=Inches(5.6))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_cap = p_cap.add_run("Figura 2.6: Ejecución exitosa de las 8 pruebas unitarias automatizadas con pytest (100% aprobadas)")
+        r_cap = p_cap.add_run("Figura 2.7: Ejecución exitosa de las 8 pruebas unitarias automatizadas con pytest (100% aprobadas)")
         r_cap.font.size = Pt(8.5)
         r_cap.font.italic = True
         r_cap.font.color.rgb = COLOR_GRAY
@@ -483,13 +501,14 @@ def build_avance_2():
     # 9. Guía de Ejecución Rápida
     add_heading_1(doc, "9. Guía de Ejecución Local para Evaluación")
     add_paragraph(doc, 
-        "Para ejecutar el prototipo en cualquier equipo con Python 3 instalado:")
+        "Para ejecutar el prototipo en Linux con MariaDB:")
     add_bullet(doc, "cd /home/adrian/proyectos/labcontrol", bold_prefix="1. Acceder al directorio: ")
-    add_bullet(doc, "python3 seed_data.py (inicializa la base de datos y datos ficticios)", bold_prefix="2. Inicializar BD (opcional): ")
-    add_bullet(doc, "python3 app.py", bold_prefix="3. Iniciar servidor: ")
-    add_bullet(doc, "Abrir en el navegador: http://127.0.0.1:5000", bold_prefix="4. Abrir en navegador: ")
-    add_bullet(doc, "Admin: 'admin' / 'admin123' | Usuario: 'recepcion' / 'recepcion123'", bold_prefix="5. Credenciales: ")
-    add_bullet(doc, "pytest -v", bold_prefix="6. Ejecutar pruebas: ")
+    add_bullet(doc, "systemctl --user start mariadb-user (asegura que el servicio MariaDB esté activo)", bold_prefix="2. Iniciar MariaDB: ")
+    add_bullet(doc, "python3 seed_data.py (inicializa la base 'labcontrol' y datos de prueba)", bold_prefix="3. Inicializar BD: ")
+    add_bullet(doc, "python3 app.py o ./run.sh (inicia el servidor en http://127.0.0.1:5000)", bold_prefix="4. Iniciar servidor: ")
+    add_bullet(doc, "Abrir en el navegador: http://127.0.0.1:5000", bold_prefix="5. Abrir en navegador: ")
+    add_bullet(doc, "Admin: 'admin' / 'admin123' | Usuario: 'recepcion' / 'recepcion123'", bold_prefix="6. Credenciales: ")
+    add_bullet(doc, "pytest -v (ejecuta las 8 pruebas automatizadas)", bold_prefix="7. Ejecutar pruebas: ")
 
     out_file = os.path.join(DOCS_DIR, "Avance_2_LabControl_Prototipo_Funcional.docx")
     doc.save(out_file)
