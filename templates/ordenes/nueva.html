@@ -5,130 +5,116 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-12 col-xl-11">
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
             <div>
-                <h1 class="h3 fw-bold text-dark mb-1">
-                    Generar Solicitud de Análisis Clínicos
-                </h1>
-                <p class="text-muted mb-0 small">Asignación de paciente, selección múltiple de estudios y cotización automática en tiempo real.</p>
+                <h1 class="h4 mb-0 fw-semibold text-dark">Nueva Orden de Estudio</h1>
+                <p class="text-muted small mb-0">Selección de paciente, estudios del catálogo y cálculo automático.</p>
             </div>
-            <a href="{{ url_for('lista_ordenes') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Volver a Órdenes
+            <a href="{{ url_for('lista_ordenes') }}" class="btn btn-sm btn-subtle">
+                &larr; Volver
             </a>
         </div>
 
         <form method="POST" action="{{ url_for('nueva_orden') }}" id="formNuevaOrden">
-            <div class="row g-4">
+            <div class="row g-3">
                 <!-- Columna Izquierda: Paciente y Datos Administrativos -->
                 <div class="col-12 col-lg-5">
-                    <div class="card card-clinical mb-4">
-                        <div class="card-header-clinical">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-light text-secondary border font-tabular">1</span>
-                                <h2 class="h6 fw-bold mb-0 text-dark">Paciente Solicitante</h2>
-                            </div>
+                    <div class="panel-clinical p-4 mb-3">
+                        <div class="small text-secondary fw-semibold text-uppercase mb-3 pb-1 border-bottom" style="font-size: 0.75rem; letter-spacing: 0.04em;">
+                            1. Paciente y Administrativo
                         </div>
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <label for="paciente_id" class="form-label small fw-semibold text-muted text-uppercase">Paciente <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-lg fs-6" id="paciente_id" name="paciente_id" required>
-                                    <option value="" disabled {% if not paciente_pre %}selected{% endif %}>-- Elige un paciente del padrón --</option>
-                                    {% for p in pacientes %}
-                                    <option value="{{ p.id }}" {% if paciente_pre|string == p.id|string %}selected{% endif %}>
-                                        {{ p.apellido }}, {{ p.nombre }} (CURP: {{ p.curp or 'S/C' }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="text-muted small mb-3">
-                                ¿Nuevo paciente? <a href="{{ url_for('nuevo_paciente') }}" class="text-decoration-none fw-semibold">Dar de alta aquí</a>
-                            </div>
 
-                            <hr class="my-3">
+                        <div class="mb-3">
+                            <label for="paciente_id" class="form-label">Paciente <span class="text-danger">*</span></label>
+                            <select class="form-select" id="paciente_id" name="paciente_id" required>
+                                <option value="" disabled {% if not paciente_pre %}selected{% endif %}>-- Seleccionar paciente --</option>
+                                {% for p in pacientes %}
+                                <option value="{{ p.id }}" {% if paciente_pre|string == p.id|string %}selected{% endif %}>
+                                    {{ p.apellido }}, {{ p.nombre }} (CURP: {{ p.curp or 'S/C' }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="text-muted small mb-3" style="font-size: 0.8rem;">
+                            ¿Paciente no registrado? <a href="{{ url_for('nuevo_paciente') }}" class="text-decoration-none">Dar de alta</a>
+                        </div>
 
-                            <div class="mb-3">
-                                <label for="metodo_pago" class="form-label small fw-semibold text-muted text-uppercase">Forma de Pago</label>
-                                <select class="form-select" id="metodo_pago" name="metodo_pago">
-                                    <option value="Efectivo" selected>Efectivo</option>
-                                    <option value="Tarjeta de Débito">Tarjeta de Débito</option>
-                                    <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
-                                    <option value="Transferencia SPEI">Transferencia SPEI</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="metodo_pago" class="form-label">Forma de Pago</label>
+                            <select class="form-select" id="metodo_pago" name="metodo_pago">
+                                <option value="Efectivo" selected>Efectivo</option>
+                                <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                                <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                                <option value="Transferencia SPEI">Transferencia SPEI</option>
+                            </select>
+                        </div>
 
-                            <div class="mb-3">
-                                <label for="notas_clinicas" class="form-label small fw-semibold text-muted text-uppercase">Notas Clínicas / Indicaciones Médicas</label>
-                                <textarea class="form-control" id="notas_clinicas" name="notas_clinicas" rows="3" placeholder="Ej. Paciente refiere ayuno de 10 horas. Médico solicitante: Dr. Alejandro Ramos."></textarea>
-                            </div>
+                        <div class="mb-3">
+                            <label for="notas_clinicas" class="form-label">Notas Clínicas</label>
+                            <textarea class="form-control" id="notas_clinicas" name="notas_clinicas" rows="3" placeholder="Ej. Horas de ayuno, médico solicitante..."></textarea>
+                        </div>
 
-                            <div class="form-check form-switch p-3 bg-light rounded-3 border">
-                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="marcar_recibida_inmediato" name="marcar_recibida_inmediato" value="1" checked>
-                                <label class="form-check-label fw-semibold text-dark" for="marcar_recibida_inmediato">
-                                    <i class="bi bi-droplet text-danger me-1"></i> Recepción de Muestra Inmediata
-                                    <div class="text-muted small fw-normal">Marcar toma biológica recolectada en ventanilla en este instante.</div>
-                                </label>
-                            </div>
+                        <div class="form-check p-2 bg-light rounded border">
+                            <input class="form-check-input ms-1 me-2" type="checkbox" id="marcar_recibida_inmediato" name="marcar_recibida_inmediato" value="1" checked>
+                            <label class="form-check-label text-dark small" for="marcar_recibida_inmediato">
+                                <strong>Recepción Inmediata de Muestra</strong>
+                                <span class="text-muted d-block" style="font-size: 0.75rem;">Marcar recolectada en ventanilla en este momento.</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Resumen del Pedido / Cotización en Vivo -->
-                    <div class="card card-clinical border-0 p-4" style="background-color: #0f172a; color: #ffffff;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-white-50 text-uppercase small fw-bold" style="letter-spacing: 0.05em;">Total de la Orden</span>
-                            <span class="badge bg-secondary-subtle text-white px-2 py-1" id="countEstudios">0 estudios</span>
+                    <!-- Resumen del Importe (Sobrio, sin negro total ni gradientes) -->
+                    <div class="panel-clinical p-3" style="background-color: var(--c-surface-subtle);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.04em;">Importe Total</span>
+                            <span class="badge bg-light text-secondary border font-tabular" id="countEstudios">0 estudios</span>
                         </div>
-                        <div class="display-6 fw-bold mb-3 font-tabular" id="totalMonto">$0.00 MXN</div>
-                        <p class="small text-white-50 mb-4" style="font-size: 0.825rem;">
-                            <i class="bi bi-shield-check text-info me-1"></i> El sistema generará automáticamente un código de folio único rastreable (ej. ORD-2026-XXXX).
-                        </p>
-                        <button type="submit" class="btn btn-clinical-primary btn-lg w-100 py-3 fw-bold">
-                            <i class="bi bi-check2-circle me-2"></i> Confirmar y Generar Orden
+                        <div class="h3 mb-3 font-tabular fw-semibold text-dark" id="totalMonto">$0.00 MXN</div>
+                        <button type="submit" class="btn btn-steel w-100 py-2">
+                            Crear Orden y Registrar
                         </button>
                     </div>
                 </div>
 
                 <!-- Columna Derecha: Catálogo de Estudios para Seleccionar -->
                 <div class="col-12 col-lg-7">
-                    <div class="card card-clinical">
-                        <div class="card-header-clinical">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-light text-secondary border font-tabular">2</span>
-                                <h2 class="h6 fw-bold mb-0 text-dark">Catálogo de Análisis Clínicos</h2>
+                    <div class="panel-clinical">
+                        <div class="panel-header">
+                            <div>
+                                <h2 class="panel-title">2. Catálogo de Estudios Clínicos</h2>
+                                <p class="panel-subtitle">Marca los análisis a incluir en la solicitud</p>
                             </div>
-                            <span class="small text-muted">Selección múltiple</span>
                         </div>
-                        <div class="card-body p-3">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                                <input type="text" id="filtroEstudios" class="form-control border-start-0" placeholder="Buscar estudio por nombre o categoría...">
-                            </div>
 
-                            <div class="list-group list-group-flush" id="listaEstudios" style="max-height: 520px; overflow-y: auto;">
-                                {% for est in estudios %}
-                                <label class="list-group-item list-group-item-action d-flex align-items-start gap-3 p-3 estudio-item border-bottom" data-nombre="{{ est.nombre|lower }}" data-categoria="{{ est.categoria|lower }}" style="cursor: pointer;">
-                                    <input class="form-check-input mt-1 check-estudio flex-shrink-0" type="checkbox" name="estudios" value="{{ est.id }}" data-precio="{{ est.precio }}">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <div class="fw-bold text-dark">{{ est.nombre }}</div>
-                                            <div class="fw-bold font-tabular fs-5 text-dark">${{ "%.2f"|format(est.precio) }}</div>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2 align-items-center small mb-1">
-                                            <span class="badge bg-light text-secondary border font-monospace">{{ est.codigo }}</span>
-                                            <span class="badge bg-light text-dark border">{{ est.categoria }}</span>
-                                            <span class="text-muted font-tabular"><i class="bi bi-clock me-1"></i>{{ est.tiempo_entrega_horas }} hrs</span>
-                                        </div>
-                                        <div class="small text-muted">
-                                            <i class="bi bi-droplet-half text-danger me-1"></i><strong>Muestra:</strong> {{ est.tipo_muestra }}
-                                        </div>
-                                        {% if est.indicaciones %}
-                                        <div class="small text-muted fst-italic mt-1" style="font-size: 0.8rem;">
-                                            <i class="bi bi-info-circle me-1"></i>{{ est.indicaciones }}
-                                        </div>
-                                        {% endif %}
+                        <div class="p-3 border-bottom">
+                            <input type="text" id="filtroEstudios" class="form-control" placeholder="Filtrar por nombre o categoría...">
+                        </div>
+
+                        <div class="list-group list-group-flush" id="listaEstudios" style="max-height: 480px; overflow-y: auto;">
+                            {% for est in estudios %}
+                            <label class="list-group-item d-flex align-items-start gap-3 p-3 estudio-item border-bottom" data-nombre="{{ est.nombre|lower }}" data-categoria="{{ est.categoria|lower }}" style="cursor: pointer;">
+                                <input class="form-check-input mt-1 check-estudio flex-shrink-0" type="checkbox" name="estudios" value="{{ est.id }}" data-precio="{{ est.precio }}">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold text-dark">{{ est.nombre }}</div>
+                                        <div class="font-tabular fw-semibold text-dark">${{ "%.2f"|format(est.precio) }}</div>
                                     </div>
-                                </label>
-                                {% endfor %}
-                            </div>
+                                    <div class="d-flex flex-wrap gap-2 align-items-center small mb-1">
+                                        <span class="code-tag font-monospace text-muted">{{ est.codigo }}</span>
+                                        <span class="text-muted">&bull; {{ est.categoria }}</span>
+                                        <span class="text-muted font-tabular">&bull; {{ est.tiempo_entrega_horas }} hrs</span>
+                                    </div>
+                                    <div class="small text-muted" style="font-size: 0.8rem;">
+                                        <strong>Muestra:</strong> {{ est.tipo_muestra }}
+                                    </div>
+                                    {% if est.indicaciones %}
+                                    <div class="small text-secondary fst-italic mt-1" style="font-size: 0.75rem;">
+                                        {{ est.indicaciones }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </label>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>

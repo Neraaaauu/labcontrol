@@ -4,65 +4,60 @@
 
 {% block content %}
 <div class="row justify-content-center align-items-center py-4 py-md-5">
-    <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-        <div class="card card-clinical border-0 shadow-lg overflow-hidden">
-            <div class="p-4 p-md-5 pb-4 text-center border-bottom" style="background-color: #0f172a;">
-                <div class="brand-mark mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.5rem; border-radius: 12px;">
-                    <i class="bi bi-droplet-half"></i>
+    <div class="col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4">
+        <div class="panel-clinical p-4 p-md-4">
+            <div class="text-center mb-4 pb-2 border-bottom">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2" style="width: 38px; height: 38px; border-radius: 8px; background-color: #f1f5f9; color: var(--c-accent);">
+                    <i class="bi bi-droplet-half fs-5"></i>
                 </div>
-                <h1 class="h4 fw-bold text-white mb-1" style="letter-spacing: -0.02em;">LabControl</h1>
-                <p class="text-white-50 small mb-0">Sistema de Trazabilidad y Gestión de Laboratorio Clínico</p>
+                <h1 class="h5 fw-semibold text-dark mb-1">Acceso a LabControl</h1>
+                <p class="text-muted small mb-0">Sistema de Administración de Laboratorio Clínico</p>
             </div>
 
-            <div class="card-body p-4 p-md-4">
-                <form method="POST" action="{{ url_for('login') }}" class="mb-4">
-                    <div class="mb-3">
-                        <label for="username" class="form-label small fw-semibold text-muted text-uppercase" style="letter-spacing: 0.05em;">
-                            Nombre de Usuario
-                        </label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Ingresa tu usuario" required autofocus>
-                    </div>
+            <form method="POST" action="{{ url_for('login') }}" class="mb-4">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Nombre de usuario" required autofocus>
+                </div>
 
-                    <div class="mb-4">
-                        <label for="password" class="form-label small fw-semibold text-muted text-uppercase" style="letter-spacing: 0.05em;">
-                            Contraseña de Acceso
-                        </label>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña de acceso" required>
+                </div>
 
-                    <button type="submit" class="btn btn-clinical-primary w-100 py-2 fw-bold">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
+                <button type="submit" class="btn btn-steel w-100 py-2 mt-2">
+                    Ingresar al Sistema
+                </button>
+            </form>
+
+            <!-- Accesos de Evaluación Rápida (2 Roles) -->
+            <div class="pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Cuentas de Prueba</span>
+                    <span class="small text-muted" style="font-size: 0.75rem;">2 Roles</span>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-sm btn-subtle text-start d-flex justify-content-between align-items-center py-1 px-3" onclick="setDemo('admin', 'admin123')">
+                        <div>
+                            <span class="fw-medium text-dark">Carlos Méndez</span>
+                            <span class="text-muted small ms-1">(admin)</span>
+                        </div>
+                        <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.7rem;">admin123</span>
                     </button>
-                </form>
-
-                <!-- Selección Rápida de Roles para Evaluación -->
-                <div class="pt-3 border-top">
-                    <div class="small fw-bold text-muted text-uppercase mb-2 text-center" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                        Accesos de Demostración (2 Roles)
-                    </div>
-                    <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3" onclick="setDemo('admin', 'admin123')">
-                            <div>
-                                <div class="fw-bold text-dark" style="font-size: 0.85rem;">QFB. Carlos Méndez</div>
-                                <small class="text-muted" style="font-size: 0.75rem;">admin / admin123</small>
-                            </div>
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle text-uppercase" style="font-size: 0.7rem;">Admin</span>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3" onclick="setDemo('recepcion', 'recepcion123')">
-                            <div>
-                                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Laura Morales</div>
-                                <small class="text-muted" style="font-size: 0.75rem;">recepcion / recepcion123</small>
-                            </div>
-                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle text-uppercase" style="font-size: 0.7rem;">Usuario</span>
-                        </button>
-                    </div>
+                    <button type="button" class="btn btn-sm btn-subtle text-start d-flex justify-content-between align-items-center py-1 px-3" onclick="setDemo('recepcion', 'recepcion123')">
+                        <div>
+                            <span class="fw-medium text-dark">Laura Morales</span>
+                            <span class="text-muted small ms-1">(recepción)</span>
+                        </div>
+                        <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.7rem;">recepcion123</span>
+                    </button>
                 </div>
+            </div>
 
-                <div class="mt-4 pt-2 text-center">
-                    <a href="{{ url_for('consultar_codigo') }}" class="small text-decoration-none text-muted">
-                        <i class="bi bi-search me-1"></i> ¿Eres paciente? Consulta tus resultados por código
-                    </a>
-                </div>
+            <div class="mt-4 pt-2 text-center">
+                <a href="{{ url_for('consultar_codigo') }}" class="small text-decoration-none text-muted">
+                    &rarr; Consulta de resultados para pacientes con código de folio
+                </a>
             </div>
         </div>
     </div>

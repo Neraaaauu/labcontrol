@@ -3,71 +3,65 @@
 {% block title %}Catálogo de Estudios - LabControl{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 pb-3 mb-3 border-bottom">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">
-            Catálogo Maestro de Estudios Clínicos
-        </h1>
-        <p class="text-muted mb-0 small">Análisis disponibles, requisitos de muestra biológica, tiempos de respuesta y tarifas.</p>
+        <h1 class="h4 mb-0 fw-semibold text-dark">Catálogo de Estudios Clínicos</h1>
+        <p class="text-muted small mb-0">Pruebas analíticas, preparación previa, tipo de muestra y tarifas vigentes.</p>
     </div>
     {% if session.get('rol') == 'admin' %}
     <div>
-        <a href="{{ url_for('nuevo_estudio') }}" class="btn btn-clinical-primary fw-semibold">
-            <i class="bi bi-plus-lg me-1"></i> Agregar Estudio
+        <a href="{{ url_for('nuevo_estudio') }}" class="btn btn-steel">
+            Agregar Estudio
         </a>
     </div>
     {% endif %}
 </div>
 
-<div class="card card-clinical">
+<div class="panel-clinical">
     <div class="table-responsive">
         <table class="table-clinical">
             <thead>
                 <tr>
-                    <th style="width: 100px;">Código</th>
+                    <th style="width: 90px;">Código</th>
                     <th>Análisis Clínico</th>
-                    <th>Área / Categoría</th>
-                    <th>Muestra Requerida</th>
-                    <th>Preparación / Ayuno</th>
+                    <th>Área</th>
+                    <th>Tipo de Muestra</th>
+                    <th>Indicaciones / Ayuno</th>
                     <th>Entrega</th>
-                    <th class="text-end">Tarifa (MXN)</th>
+                    <th class="text-end" style="width: 120px;">Tarifa</th>
                 </tr>
             </thead>
             <tbody>
                 {% for e in estudios %}
                 <tr>
                     <td>
-                        <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.8rem;">
-                            {{ e.codigo }}
-                        </span>
+                        <span class="code-tag font-monospace text-secondary small">{{ e.codigo }}</span>
                     </td>
                     <td>
-                        <div class="fw-bold text-dark">{{ e.nombre }}</div>
+                        <div class="fw-medium text-dark">{{ e.nombre }}</div>
                         {% if e.descripcion %}
-                        <small class="text-muted d-block">{{ e.descripcion }}</small>
+                        <small class="text-muted d-block" style="font-size: 0.775rem;">{{ e.descripcion }}</small>
                         {% endif %}
                     </td>
                     <td>
-                        <span class="badge bg-light text-secondary border">{{ e.categoria }}</span>
+                        <span class="text-secondary small">{{ e.categoria }}</span>
                     </td>
                     <td>
-                        <div class="small fw-medium text-dark">
-                            <i class="bi bi-droplet-half text-danger me-1"></i> {{ e.tipo_muestra }}
-                        </div>
+                        <span class="text-dark small">{{ e.tipo_muestra }}</span>
                     </td>
                     <td>
-                        <small class="text-muted">{{ e.indicaciones or 'Sin ayuno especial.' }}</small>
+                        <small class="text-muted">{{ e.indicaciones or 'Sin ayuno especial' }}</small>
                     </td>
                     <td>
-                        <span class="badge bg-light text-muted border font-tabular"><i class="bi bi-clock me-1"></i>{{ e.tiempo_entrega_horas }} hrs</span>
+                        <span class="text-muted small font-tabular">{{ e.tiempo_entrega_horas }} hrs</span>
                     </td>
-                    <td class="text-end fw-bold font-tabular text-dark fs-6">
+                    <td class="text-end font-tabular fw-medium text-dark">
                         ${{ "%.2f"|format(e.precio) }}
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" class="text-center py-5 text-muted">
+                    <td colspan="7" class="text-center py-4 text-muted">
                         No hay estudios registrados en el catálogo.
                     </td>
                 </tr>

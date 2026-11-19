@@ -3,53 +3,47 @@
 {% block title %}Pacientes - LabControl{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 pb-3 mb-3 border-bottom">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">
-            Directorio de Pacientes
-        </h1>
-        <p class="text-muted mb-0 small">Expedientes clínicos, datos sociodemográficos y generación de órdenes.</p>
+        <h1 class="h4 mb-0 fw-semibold text-dark">Directorio de Pacientes</h1>
+        <p class="text-muted small mb-0">Gestión de expedientes clínicos y emisión de órdenes.</p>
     </div>
     <div>
-        <a href="{{ url_for('nuevo_paciente') }}" class="btn btn-clinical-primary fw-semibold">
-            <i class="bi bi-person-plus me-1"></i> Registrar Paciente
+        <a href="{{ url_for('nuevo_paciente') }}" class="btn btn-steel">
+            Registrar Paciente
         </a>
     </div>
 </div>
 
-<!-- Filtro de Búsqueda -->
-<div class="card card-clinical mb-4">
-    <div class="card-body p-3">
-        <form method="GET" action="{{ url_for('lista_pacientes') }}" class="row g-2">
-            <div class="col-12 col-md-9 col-lg-10">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" value="{{ q }}" class="form-control border-start-0" placeholder="Buscar por nombre, apellido, CURP o teléfono...">
-                </div>
+<!-- Contenedor Unificado de Pacientes (Búsqueda + Tabla en un solo panel) -->
+<div class="panel-clinical">
+    <!-- Barra de Búsqueda Integrada -->
+    <div class="p-3 border-bottom bg-white">
+        <form method="GET" action="{{ url_for('lista_pacientes') }}" class="row g-2 align-items-center">
+            <div class="col-12 col-md-8 col-lg-9">
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por nombre, apellidos, CURP o teléfono...">
             </div>
-            <div class="col-12 col-md-3 col-lg-2 d-flex gap-2">
-                <button type="submit" class="btn btn-outline-secondary w-100 fw-semibold">Buscar</button>
+            <div class="col-12 col-md-4 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-subtle w-100">Filtrar</button>
                 {% if q %}
-                    <a href="{{ url_for('lista_pacientes') }}" class="btn btn-outline-secondary" title="Limpiar"><i class="bi bi-x-lg"></i></a>
+                    <a href="{{ url_for('lista_pacientes') }}" class="btn btn-subtle" title="Limpiar filtro">Limpiar</a>
                 {% endif %}
             </div>
         </form>
     </div>
-</div>
 
-<!-- Tabla de Pacientes -->
-<div class="card card-clinical">
+    <!-- Tabla de Pacientes -->
     <div class="table-responsive">
         <table class="table-clinical">
             <thead>
                 <tr>
-                    <th style="width: 70px;">ID</th>
-                    <th>Nombre Completo</th>
+                    <th style="width: 60px;">ID</th>
+                    <th>Nombre y Apellidos</th>
                     <th>CURP</th>
                     <th>Contacto</th>
                     <th>Ubicación</th>
-                    <th>Historial</th>
-                    <th class="text-end">Acciones</th>
+                    <th>Órdenes</th>
+                    <th class="text-end" style="width: 140px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,41 +51,40 @@
                 <tr>
                     <td class="text-muted small font-tabular">#{{ p.id }}</td>
                     <td>
-                        <a href="{{ url_for('detalle_paciente', id=p.id) }}" class="fw-bold text-decoration-none" style="color: var(--brand-accent);">
+                        <a href="{{ url_for('detalle_paciente', id=p.id) }}" class="fw-semibold text-dark text-decoration-none">
                             {{ p.nombre }} {{ p.apellido }}
                         </a>
                         <div class="small text-muted font-tabular">
-                            {% if p.sexo == 'M' %}<span class="badge bg-light text-secondary border">Masc</span>
-                            {% elif p.sexo == 'F' %}<span class="badge bg-light text-secondary border">Fem</span>{% endif %}
-                            {% if p.fecha_nacimiento %}<span class="ms-1">{{ p.fecha_nacimiento }}</span>{% endif %}
+                            {% if p.sexo == 'M' %}Masc{% elif p.sexo == 'F' %}Fem{% endif %}
+                            {% if p.fecha_nacimiento %}&bull; {{ p.fecha_nacimiento }}{% endif %}
                         </div>
                     </td>
                     <td>
-                        <span class="font-monospace small px-2 py-1 bg-light rounded text-dark border">{{ p.curp or 'No registrada' }}</span>
+                        <span class="code-tag font-monospace small text-secondary">{{ p.curp or '—' }}</span>
                     </td>
                     <td>
-                        <div class="font-tabular"><i class="bi bi-telephone text-muted me-1"></i>{{ p.telefono or 'S/T' }}</div>
-                        <small class="text-muted">{{ p.email or 'Sin correo' }}</small>
+                        <div class="font-tabular">{{ p.telefono or 'S/T' }}</div>
+                        <small class="text-muted">{{ p.email or '—' }}</small>
                     </td>
                     <td>
-                        <div class="small fw-semibold text-dark">{{ p.colonia or 'N/A' }}</div>
-                        <small class="text-muted font-tabular">{{ p.municipio }}, {{ p.estado }} (CP {{ p.codigo_postal }})</small>
+                        <div class="small text-dark">{{ p.colonia or '—' }}</div>
+                        <small class="text-muted font-tabular">{{ p.municipio }}, {{ p.estado }} (CP {{ p.codigo_postal or '—' }})</small>
                     </td>
                     <td>
-                        <span class="badge bg-light text-dark border font-tabular">
-                            {{ p.total_ordenes }} orden(es)
+                        <span class="badge bg-light text-secondary border font-tabular">
+                            {{ p.total_ordenes }}
                         </span>
                     </td>
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ url_for('nueva_orden', paciente_id=p.id) }}" class="btn btn-outline-primary" title="Nueva Orden">
-                                <i class="bi bi-clipboard-plus"></i> Orden
+                            <a href="{{ url_for('nueva_orden', paciente_id=p.id) }}" class="btn btn-subtle py-1 px-2" title="Crear Orden">
+                                Orden
                             </a>
-                            <a href="{{ url_for('detalle_paciente', id=p.id) }}" class="btn btn-outline-secondary" title="Ver Expediente">
-                                <i class="bi bi-eye"></i>
+                            <a href="{{ url_for('detalle_paciente', id=p.id) }}" class="btn btn-subtle py-1 px-2" title="Ver Expediente">
+                                Ficha
                             </a>
-                            <a href="{{ url_for('editar_paciente', id=p.id) }}" class="btn btn-outline-secondary" title="Editar">
-                                <i class="bi bi-pencil"></i>
+                            <a href="{{ url_for('editar_paciente', id=p.id) }}" class="btn btn-subtle py-1 px-2" title="Editar">
+                                Editar
                             </a>
                         </div>
                     </td>
@@ -99,8 +92,7 @@
                 {% else %}
                 <tr>
                     <td colspan="7" class="text-center py-5 text-muted">
-                        <i class="bi bi-people fs-2 d-block mb-2 text-muted"></i>
-                        No se encontraron registros de pacientes con ese criterio.
+                        No se encontraron registros de pacientes coincidentes.
                     </td>
                 </tr>
                 {% endfor %}

@@ -5,131 +5,124 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-12 col-lg-10 col-xl-9">
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
             <div>
-                <h1 class="h3 fw-bold text-dark mb-1">
-                    Alta de Expediente Clínico
-                </h1>
-                <p class="text-muted mb-0 small">Registro de datos del paciente y captura asistida de domicilio vía API.</p>
+                <h1 class="h4 mb-0 fw-semibold text-dark">Alta de Paciente</h1>
+                <p class="text-muted small mb-0">Captura de expediente clínico y validación de domicilio.</p>
             </div>
-            <a href="{{ url_for('lista_pacientes') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Volver a Lista
+            <a href="{{ url_for('lista_pacientes') }}" class="btn btn-sm btn-subtle">
+                &larr; Volver
             </a>
         </div>
 
-        <div class="card card-clinical">
-            <div class="card-body p-4 p-md-5">
-                <form method="POST" action="{{ url_for('nuevo_paciente') }}" id="formPaciente">
-                    <!-- Sección 1: Datos Personales -->
-                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                        <span class="badge bg-light text-secondary border font-tabular">1</span>
-                        <h2 class="h6 fw-bold text-dark mb-0">Información Personal del Paciente</h2>
+        <div class="panel-clinical p-4">
+            <form method="POST" action="{{ url_for('nuevo_paciente') }}" id="formPaciente">
+                <!-- 1. Datos Generales -->
+                <div class="mb-4">
+                    <div class="small text-secondary fw-semibold text-uppercase mb-3 pb-1 border-bottom" style="font-size: 0.75rem; letter-spacing: 0.04em;">
+                        1. Información General
                     </div>
-
-                    <div class="row g-3 mb-4">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="nombre" class="form-label small fw-semibold text-muted text-uppercase">Nombre(s) <span class="text-danger">*</span></label>
+                            <label for="nombre" class="form-label">Nombre(s) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nombre" name="nombre" value="{{ form.get('nombre', '') }}" placeholder="Ej. Juan Carlos" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="apellido" class="form-label small fw-semibold text-muted text-uppercase">Apellidos <span class="text-danger">*</span></label>
+                            <label for="apellido" class="form-label">Apellidos <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="apellido" name="apellido" value="{{ form.get('apellido', '') }}" placeholder="Ej. Pérez Gómez" required>
                         </div>
 
                         <div class="col-md-4">
-                            <label for="curp" class="form-label small fw-semibold text-muted text-uppercase">CURP (18 caracteres)</label>
+                            <label for="curp" class="form-label">CURP (18 caracteres)</label>
                             <input type="text" class="form-control text-uppercase font-monospace" id="curp" name="curp" maxlength="18" value="{{ form.get('curp', '') }}" placeholder="ABCD123456HBCXYZ01">
-                            <div class="form-text small">Identificador clínico único para expedientes.</div>
                         </div>
 
                         <div class="col-md-4">
-                            <label for="fecha_nacimiento" class="form-label small fw-semibold text-muted text-uppercase">Fecha de Nacimiento</label>
+                            <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
                             <input type="date" class="form-control font-tabular" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ form.get('fecha_nacimiento', '') }}">
                         </div>
 
                         <div class="col-md-4">
-                            <label for="sexo" class="form-label small fw-semibold text-muted text-uppercase">Sexo Biológico</label>
+                            <label for="sexo" class="form-label">Sexo Biológico</label>
                             <select class="form-select" id="sexo" name="sexo">
                                 <option value="" selected>Seleccionar...</option>
                                 <option value="M" {% if form.get('sexo') == 'M' %}selected{% endif %}>Masculino</option>
                                 <option value="F" {% if form.get('sexo') == 'F' %}selected{% endif %}>Femenino</option>
                                 <option value="O" {% if form.get('sexo') == 'O' %}selected{% endif %}>Otro / No especificado</option>
                             </select>
-                            <div class="form-text small">Requerido para rangos de referencia en estudios.</div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Sección 2: Contacto -->
-                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                        <span class="badge bg-light text-secondary border font-tabular">2</span>
-                        <h2 class="h6 fw-bold text-dark mb-0">Información de Contacto</h2>
+                <!-- 2. Contacto -->
+                <div class="mb-4">
+                    <div class="small text-secondary fw-semibold text-uppercase mb-3 pb-1 border-bottom" style="font-size: 0.75rem; letter-spacing: 0.04em;">
+                        2. Contacto
                     </div>
-
-                    <div class="row g-3 mb-4">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="telefono" class="form-label small fw-semibold text-muted text-uppercase">Teléfono Móvil o Fijo</label>
+                            <label for="telefono" class="form-label">Teléfono de Contacto</label>
                             <input type="tel" class="form-control font-tabular" id="telefono" name="telefono" value="{{ form.get('telefono', '') }}" placeholder="Ej. 664-555-1234">
                         </div>
                         <div class="col-md-6">
-                            <label for="email" class="form-label small fw-semibold text-muted text-uppercase">Correo Electrónico (Notificación de Resultados)</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}" placeholder="paciente@correo.com">
+                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ form.get('email', '') }}" placeholder="correo@ejemplo.com">
                         </div>
                     </div>
+                </div>
 
-                    <!-- Sección 3: Domicilio con API de Código Postal -->
-                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-light text-secondary border font-tabular">3</span>
-                            <h2 class="h6 fw-bold text-dark mb-0">Domicilio (Autocompletado Asistido por API)</h2>
-                        </div>
-                        <span class="badge bg-light text-success border">
-                            <i class="bi bi-cloud-check me-1"></i> Servicio de C.P. Activo
+                <!-- 3. Domicilio Asistido por API -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-1 border-bottom">
+                        <span class="small text-secondary fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.04em;">
+                            3. Domicilio (Asistido por API)
                         </span>
+                        <span class="text-muted small" style="font-size: 0.75rem;">Autocompletado por Código Postal</span>
                     </div>
 
-                    <div class="row g-3 mb-4">
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="codigo_postal" class="form-label small fw-semibold text-muted text-uppercase">Código Postal (5 dígitos)</label>
+                            <label for="codigo_postal" class="form-label">Código Postal</label>
                             <div class="input-group">
                                 <input type="text" class="form-control font-monospace" id="codigo_postal" name="codigo_postal" maxlength="5" value="{{ form.get('codigo_postal', '') }}" placeholder="Ej. 22000">
-                                <button type="button" class="btn btn-outline-secondary" id="btnBuscarCP" title="Consultar API">
-                                    <i class="bi bi-search"></i>
+                                <button type="button" class="btn btn-subtle" id="btnBuscarCP" title="Buscar código postal">
+                                    Buscar
                                 </button>
                             </div>
-                            <div id="cpStatus" class="small mt-1 text-muted">Ingresa los 5 dígitos para consultar.</div>
+                            <div id="cpStatus" class="small text-muted mt-1" style="font-size: 0.75rem;">Ingresa 5 dígitos para autocompletar.</div>
                         </div>
 
                         <div class="col-md-4">
-                            <label for="estado" class="form-label small fw-semibold text-muted text-uppercase">Estado</label>
+                            <label for="estado" class="form-label">Estado</label>
                             <input type="text" class="form-control" id="estado" name="estado" value="{{ form.get('estado', '') }}" placeholder="Baja California">
                         </div>
 
                         <div class="col-md-4">
-                            <label for="municipio" class="form-label small fw-semibold text-muted text-uppercase">Municipio / Ciudad</label>
+                            <label for="municipio" class="form-label">Municipio / Ciudad</label>
                             <input type="text" class="form-control" id="municipio" name="municipio" value="{{ form.get('municipio', '') }}" placeholder="Tijuana">
                         </div>
 
                         <div class="col-md-6">
-                            <label for="colonia" class="form-label small fw-semibold text-muted text-uppercase">Colonia / Asentamiento</label>
+                            <label for="colonia" class="form-label">Colonia / Asentamiento</label>
                             <div id="coloniaContainer">
                                 <input type="text" class="form-control" id="colonia" name="colonia" value="{{ form.get('colonia', '') }}" placeholder="Ej. Zona Centro">
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <label for="direccion_calle" class="form-label small fw-semibold text-muted text-uppercase">Calle y Número Exterior / Interior</label>
-                            <input type="text" class="form-control" id="direccion_calle" name="direccion_calle" value="{{ form.get('direccion_calle', '') }}" placeholder="Ej. Av. Revolución #450">
+                            <label for="direccion_calle" class="form-label">Calle y Número</label>
+                            <input type="text" class="form-control" id="direccion_calle" name="direccion_calle" value="{{ form.get('direccion_calle', '') }}" placeholder="Ej. Av. Constitución #1420">
                         </div>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
-                        <a href="{{ url_for('lista_pacientes') }}" class="btn btn-outline-secondary px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-clinical-primary px-4 fw-bold">
-                            <i class="bi bi-check2 me-1"></i> Guardar Paciente
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="{{ url_for('lista_pacientes') }}" class="btn btn-subtle">Cancelar</a>
+                    <button type="submit" class="btn btn-steel">
+                        Guardar Paciente
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -148,17 +141,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function consultarCP() {
         const cp = cpInput.value.trim();
         if (cp.length !== 5 || isNaN(cp)) {
-            statusDiv.innerHTML = '<span class="text-danger small"><i class="bi bi-x-circle me-1"></i>Ingresa un C.P. válido de 5 dígitos.</span>';
+            statusDiv.innerHTML = '<span class="text-danger">Ingresa 5 dígitos válidos.</span>';
             return;
         }
 
-        statusDiv.innerHTML = '<span class="text-secondary small"><span class="spinner-border spinner-border-sm me-1"></span>Consultando servicio de C.P....</span>';
+        statusDiv.innerHTML = '<span class="text-secondary">Consultando servicio...</span>';
 
         fetch(`/api/codigo-postal/${cp}`)
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    statusDiv.innerHTML = `<span class="text-warning small">${data.error}</span>`;
+                    statusDiv.innerHTML = `<span class="text-warning">${data.error}</span>`;
                     return;
                 }
 
@@ -176,14 +169,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         selectHtml += `</select>`;
                         coloniaContainer.innerHTML = selectHtml;
                     }
-                    statusDiv.innerHTML = `<span class="text-success small"><i class="bi bi-check2-circle me-1"></i>C.P. localizado (${data.fuente}).</span>`;
+                    statusDiv.innerHTML = `<span class="text-success">Datos obtenidos (${data.fuente}).</span>`;
                 } else {
-                    statusDiv.innerHTML = `<span class="text-muted small">${data.mensaje || 'Puedes escribir la colonia manualmente.'}</span>`;
+                    statusDiv.innerHTML = `<span class="text-muted">${data.mensaje || 'Puedes escribir la colonia manualmente.'}</span>`;
                 }
             })
             .catch(err => {
-                console.warn('Fallo de red o API externa:', err);
-                statusDiv.innerHTML = '<span class="text-muted small"><i class="bi bi-pencil me-1"></i>Servicio no disponible temporalmente. Puedes capturar domicilio manual.</span>';
+                statusDiv.innerHTML = '<span class="text-muted">Servicio no disponible temporalmente. Captura manual activa.</span>';
             });
     }
 

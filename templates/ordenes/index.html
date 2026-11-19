@@ -3,115 +3,111 @@
 {% block title %}Órdenes y Muestras - LabControl{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 pb-3 mb-4 border-bottom">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 pb-3 mb-3 border-bottom">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">
-            Órdenes de Análisis y Muestras
-        </h1>
-        <p class="text-muted mb-0 small">Control de flujo de trabajo: solicitud, toma, recepción, análisis y emisión de resultados.</p>
+        <h1 class="h4 mb-0 fw-semibold text-dark">Órdenes y Muestras</h1>
+        <p class="text-muted small mb-0">Control de flujo: solicitud, toma de muestra, recepción, análisis y resultados.</p>
     </div>
     <div>
-        <a href="{{ url_for('nueva_orden') }}" class="btn btn-clinical-primary fw-semibold">
-            <i class="bi bi-plus-lg me-1"></i> Nueva Orden
+        <a href="{{ url_for('nueva_orden') }}" class="btn btn-steel">
+            Nueva Orden
         </a>
     </div>
 </div>
 
-<!-- Filtros de Estado de Órdenes -->
-<div class="card card-clinical mb-4">
-    <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <span class="small fw-semibold text-muted text-uppercase me-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">Filtrar:</span>
-            <a href="{{ url_for('lista_ordenes') }}" class="btn btn-sm {% if not estado_filtro or estado_filtro == 'Todos' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+<!-- Contenedor Unificado (Filtros de Estado + Tabla de Órdenes) -->
+<div class="panel-clinical">
+    <!-- Barra de Filtros Integrada -->
+    <div class="p-3 border-bottom bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex flex-wrap gap-1 align-items-center">
+            <span class="small text-muted fw-semibold me-2" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;">Estado:</span>
+            <a href="{{ url_for('lista_ordenes') }}" class="btn btn-sm {% if not estado_filtro or estado_filtro == 'Todos' %}btn-secondary{% else %}btn-subtle{% endif %} btn-pill py-0 px-3" style="font-size: 0.8rem;">
                 Todos
             </a>
-            <a href="{{ url_for('lista_ordenes', estado='Pendiente') }}" class="btn btn-sm {% if estado_filtro == 'Pendiente' %}btn-warning text-dark fw-bold{% else %}btn-outline-warning text-dark{% endif %}">
-                <i class="bi bi-hourglass-split me-1"></i> Pendiente Toma
+            <a href="{{ url_for('lista_ordenes', estado='Pendiente') }}" class="btn btn-sm {% if estado_filtro == 'Pendiente' %}btn-secondary{% else %}btn-subtle{% endif %} btn-pill py-0 px-3" style="font-size: 0.8rem;">
+                Pendiente Toma
             </a>
-            <a href="{{ url_for('lista_ordenes', estado='Muestra Recibida') }}" class="btn btn-sm {% if estado_filtro == 'Muestra Recibida' %}btn-secondary fw-bold{% else %}btn-outline-secondary{% endif %}">
-                <i class="bi bi-droplet-half me-1"></i> Muestra Recibida
+            <a href="{{ url_for('lista_ordenes', estado='Muestra Recibida') }}" class="btn btn-sm {% if estado_filtro == 'Muestra Recibida' %}btn-secondary{% else %}btn-subtle{% endif %} btn-pill py-0 px-3" style="font-size: 0.8rem;">
+                Muestra Recibida
             </a>
-            <a href="{{ url_for('lista_ordenes', estado='En Análisis') }}" class="btn btn-sm {% if estado_filtro == 'En Análisis' %}btn-info text-dark fw-bold{% else %}btn-outline-info text-dark{% endif %}">
-                <i class="bi bi-gear-wide-connected me-1"></i> En Análisis
+            <a href="{{ url_for('lista_ordenes', estado='En Análisis') }}" class="btn btn-sm {% if estado_filtro == 'En Análisis' %}btn-secondary{% else %}btn-subtle{% endif %} btn-pill py-0 px-3" style="font-size: 0.8rem;">
+                En Análisis
             </a>
-            <a href="{{ url_for('lista_ordenes', estado='Completada') }}" class="btn btn-sm {% if estado_filtro == 'Completada' %}btn-success fw-bold{% else %}btn-outline-success{% endif %}">
-                <i class="bi bi-check2 me-1"></i> Completadas
+            <a href="{{ url_for('lista_ordenes', estado='Completada') }}" class="btn btn-sm {% if estado_filtro == 'Completada' %}btn-secondary{% else %}btn-subtle{% endif %} btn-pill py-0 px-3" style="font-size: 0.8rem;">
+                Completadas
             </a>
         </div>
         <div class="text-muted small font-tabular">
-            Total: <strong>{{ ordenes|length }}</strong> orden(es)
+            {{ ordenes|length }} registro(s)
         </div>
     </div>
-</div>
 
-<!-- Tabla de Órdenes -->
-<div class="card card-clinical">
+    <!-- Tabla de Órdenes -->
     <div class="table-responsive">
         <table class="table-clinical">
             <thead>
                 <tr>
-                    <th>Folio Único</th>
+                    <th style="width: 140px;">Folio</th>
                     <th>Paciente</th>
                     <th>Estudios</th>
-                    <th class="text-end">Importe Total</th>
+                    <th class="text-end">Total</th>
                     <th>Estado de Muestra</th>
-                    <th>Atendido Por</th>
-                    <th>Fecha de Registro</th>
-                    <th class="text-end">Acción</th>
+                    <th>Atendió</th>
+                    <th>Fecha</th>
+                    <th class="text-end" style="width: 110px;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for o in ordenes %}
                 <tr>
                     <td>
-                        <a href="{{ url_for('detalle_orden', id=o.id) }}" class="fw-bold font-monospace text-decoration-none" style="color: var(--brand-accent);">
+                        <a href="{{ url_for('detalle_orden', id=o.id) }}" class="fw-semibold code-tag text-decoration-none text-dark">
                             {{ o.codigo_orden }}
                         </a>
                     </td>
                     <td>
-                        <div class="fw-semibold text-dark">{{ o.paciente_nombre }}</div>
-                        <small class="text-muted font-monospace" style="font-size: 0.8rem;">{{ o.paciente_curp or 'CURP no registrada' }}</small>
+                        <div class="text-dark">{{ o.paciente_nombre }}</div>
+                        <small class="text-muted font-monospace" style="font-size: 0.75rem;">{{ o.paciente_curp or '—' }}</small>
                     </td>
                     <td>
-                        <span class="badge bg-light text-dark border">{{ o.num_estudios }} análisis</span>
+                        <span class="text-secondary small">{{ o.num_estudios }} análisis</span>
                     </td>
-                    <td class="text-end fw-bold font-tabular text-dark">
-                        ${{ "%.2f"|format(o.total) }} MXN
+                    <td class="text-end font-tabular fw-medium">
+                        ${{ "%.2f"|format(o.total) }}
                     </td>
                     <td>
                         {% if o.estado_orden == 'Pendiente' %}
-                            <span class="status-badge status-badge-pendiente">
-                                <i class="bi bi-hourglass-split"></i> Pendiente Toma
+                            <span class="badge-status badge-status-pendiente">
+                                <span class="dot-indicator"></span> Pendiente Toma
                             </span>
                         {% elif o.estado_orden == 'Muestra Recibida' %}
-                            <span class="status-badge status-badge-recibida">
-                                <i class="bi bi-droplet-half"></i> Muestra Recibida
+                            <span class="badge-status badge-status-recibida">
+                                <span class="dot-indicator"></span> Muestra Recibida
                             </span>
                         {% elif o.estado_orden == 'En Análisis' %}
-                            <span class="status-badge status-badge-analisis">
-                                <span class="pulse-dot"></span> En Análisis
+                            <span class="badge-status badge-status-analisis">
+                                <span class="dot-indicator"></span> En Análisis
                             </span>
                         {% elif o.estado_orden == 'Completada' %}
-                            <span class="status-badge status-badge-completada">
-                                <i class="bi bi-check2"></i> Completada
+                            <span class="badge-status badge-status-completada">
+                                <span class="dot-indicator"></span> Completada
                             </span>
                         {% else %}
-                            <span class="status-badge">{{ o.estado_orden }}</span>
+                            <span class="badge-status">{{ o.estado_orden }}</span>
                         {% endif %}
                     </td>
-                    <td class="small text-muted">{{ o.atendido_por }}</td>
-                    <td class="small text-muted font-tabular">{{ o.creado_en[:16] }}</td>
+                    <td class="text-secondary small">{{ o.atendido_por.split('(')[0].strip() }}</td>
+                    <td class="text-muted small font-tabular">{{ o.creado_en[:16] }}</td>
                     <td class="text-end">
-                        <a href="{{ url_for('detalle_orden', id=o.id) }}" class="btn btn-sm btn-outline-secondary py-1 px-3" title="Ver Seguimiento">
-                            Seguimiento <i class="bi bi-arrow-right ms-1"></i>
+                        <a href="{{ url_for('detalle_orden', id=o.id) }}" class="btn btn-sm btn-subtle py-1 px-2" style="font-size: 0.8rem;">
+                            Detalle &rarr;
                         </a>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
                     <td colspan="8" class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
-                        No hay órdenes registradas con este criterio.
+                        No hay órdenes registradas bajo este criterio.
                     </td>
                 </tr>
                 {% endfor %}
