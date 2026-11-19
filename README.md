@@ -19,7 +19,7 @@
 | Requerimiento Oficial (PDF de la Materia) | Estado | Implementación en LabControl |
 | :--- | :---: | :--- |
 | **Framework Web** | ✅ | **Flask 3.1.3 (Python 3.12)** con arquitectura modular y limpia. |
-| **Base de Datos Relacional** | ✅ | **SQLite3** con claves foráneas activas (`PRAGMA foreign_keys = ON`). |
+| **Base de Datos Relacional** | ✅ | **MariaDB 10.11+ / MySQL** (como motor principal de usuario en Linux) con fallback transparente a SQLite3. Claves foráneas activas (`ON DELETE RESTRICT/CASCADE`). |
 | **Inicio y Cierre de Sesión con 2 Roles** | ✅ | Sesiones firmadas y contraseñas seguras con Werkzeug. Roles: **admin** y **usuario**. |
 | **Módulo 1: Pacientes** | ✅ | Padrón, búsqueda en tiempo real, validación de CURP y expediente clínico. |
 | **Módulo 2: Órdenes y Muestras** | ✅ | Generación de orden multi-estudio, cotización en vivo y cambio de estados. |

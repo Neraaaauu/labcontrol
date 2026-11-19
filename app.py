@@ -43,11 +43,14 @@ def admin_required(f):
 
 @app.context_processor
 def inject_now():
+    from database import is_using_mariadb
     return {
         'now': datetime.datetime.now(),
         'app_name': 'LabControl',
-        'current_year': 2026
+        'current_year': 2026,
+        'db_engine': 'MariaDB (Linux)' if is_using_mariadb() else 'SQLite'
     }
+
 
 # ==========================================
 # RUTAS DE AUTENTICACIÓN

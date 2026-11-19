@@ -13,11 +13,13 @@ import seed_data
 
 @pytest.fixture
 def client():
-    # Usar base de datos temporal para pruebas aisladas
+    # Usar base de datos temporal SQLite para pruebas aisladas
     db_fd, db_path = tempfile.mkstemp(suffix='.db')
     database.DB_PATH = db_path
+    database.PREFERRED_ENGINE = 'sqlite'
     lab_app.app.config['TESTING'] = True
     lab_app.app.secret_key = 'test-secret-key'
+
 
     with lab_app.app.test_client() as client:
         with lab_app.app.app_context():

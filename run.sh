@@ -6,11 +6,11 @@ echo "============================================="
 echo "  Iniciando LabControl - Laboratorio Clínico "
 echo "============================================="
 
-# Inicializar BD con datos semilla si no existe
-if [ ! -f "instance/labcontrol.db" ]; then
-    echo "[*] Creando base de datos inicial y cargando datos semilla..."
-    python3 seed_data.py
-fi
+# Asegurar que MariaDB (servicio de usuario) esté activo
+systemctl --user start mariadb-user 2>/dev/null || true
+
+# Inicializar y verificar BD
+python3 seed_data.py
 
 echo "[*] Servidor disponible en: http://127.0.0.1:5000"
 echo "[*] Roles de demostración:"
