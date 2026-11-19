@@ -337,13 +337,18 @@ def build_pdf():
     # 9. Guía de Ejecución Local
     story.append(Paragraph("9. Guía de Ejecución Local para Evaluación", h1_style))
     story.append(Paragraph(
-        "El proyecto se ejecuta en Linux con MariaDB y Python 3:<br/>"
+        "<b>Opción A — En Linux (MariaDB nativo):</b><br/>"
         "&bull; <b>Directorio:</b> <code>cd /home/adrian/proyectos/labcontrol</code><br/>"
         "&bull; <b>Servicio MariaDB:</b> <code>systemctl --user start mariadb-user</code><br/>"
-        "&bull; <b>Inicializar BD:</b> <code>python3 seed_data.py</code><br/>"
-        "&bull; <b>Iniciar Servidor:</b> <code>./run.sh</code> o <code>python3 app.py</code> (URL: <code>http://127.0.0.1:5000</code>)<br/>"
+        "&bull; <b>Semilla y Servidor:</b> <code>./run.sh</code> o <code>python3 app.py</code> (URL: <code>http://127.0.0.1:5000</code>)<br/>"
         "&bull; <b>Credenciales:</b> Admin: <code>admin</code> / <code>admin123</code> &bull; Usuario: <code>recepcion</code> / <code>recepcion123</code><br/>"
-        "&bull; <b>Ejecutar Pruebas:</b> <code>pytest -v</code>",
+        "&bull; <b>Pruebas Unitarias:</b> <code>pytest -v</code><br/><br/>"
+        "<b>Opción B — En Windows (CMD / PowerShell):</b><br/>"
+        "&bull; <b>Directorio:</b> <code>cd C:\\ruta\\hacia\\labcontrol</code><br/>"
+        "&bull; <b>Dependencias:</b> <code>pip install -r requirements.txt</code><br/>"
+        "&bull; <b>Base de Datos:</b> Iniciar MySQL en XAMPP (opcional; si no hay servidor activo, entra respaldo SQLite transparente)<br/>"
+        "&bull; <b>Semilla y Servidor:</b> Doble clic en <code>run.bat</code> o ejecutar <code>python app.py</code> (URL: <code>http://127.0.0.1:5000</code>)<br/>"
+        "&bull; <b>Pruebas Unitarias:</b> <code>pytest -v</code>",
         body_style
     ))
 

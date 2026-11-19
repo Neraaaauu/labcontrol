@@ -501,7 +501,9 @@ def build_avance_2():
     # 9. Guía de Ejecución Rápida
     add_heading_1(doc, "9. Guía de Ejecución Local para Evaluación")
     add_paragraph(doc, 
-        "Para ejecutar el prototipo en Linux con MariaDB:")
+        "El sistema es multiplataforma y está preparado para ejecutarse tanto en Linux con MariaDB nativo como en Windows:")
+    
+    add_paragraph(doc, "Opción A: Ejecución en Linux (MariaDB nativo)", bold_prefix="")
     add_bullet(doc, "cd /home/adrian/proyectos/labcontrol", bold_prefix="1. Acceder al directorio: ")
     add_bullet(doc, "systemctl --user start mariadb-user (asegura que el servicio MariaDB esté activo)", bold_prefix="2. Iniciar MariaDB: ")
     add_bullet(doc, "python3 seed_data.py (inicializa la base 'labcontrol' y datos de prueba)", bold_prefix="3. Inicializar BD: ")
@@ -509,6 +511,16 @@ def build_avance_2():
     add_bullet(doc, "Abrir en el navegador: http://127.0.0.1:5000", bold_prefix="5. Abrir en navegador: ")
     add_bullet(doc, "Admin: 'admin' / 'admin123' | Usuario: 'recepcion' / 'recepcion123'", bold_prefix="6. Credenciales: ")
     add_bullet(doc, "pytest -v (ejecuta las 8 pruebas automatizadas)", bold_prefix="7. Ejecutar pruebas: ")
+
+    add_paragraph(doc, "Opción B: Ejecución en Windows (CMD / PowerShell)", bold_prefix="")
+    add_bullet(doc, "cd C:\\ruta\\a\\labcontrol (o abrir terminal en la carpeta)", bold_prefix="1. Acceder al directorio: ")
+    add_bullet(doc, "pip install -r requirements.txt (instala Flask, PyMySQL, etc.)", bold_prefix="2. Dependencias: ")
+    add_bullet(doc, "Iniciar MySQL en XAMPP (opcional; si no hay servidor activo, entra respaldo SQLite transparente)", bold_prefix="3. Base de Datos: ")
+    add_bullet(doc, "python seed_data.py (inicializa la base y datos semilla)", bold_prefix="4. Inicializar BD: ")
+    add_bullet(doc, "python app.py o doble clic a run.bat (inicia en http://127.0.0.1:5000)", bold_prefix="5. Iniciar servidor: ")
+    add_bullet(doc, "Abrir en el navegador: http://127.0.0.1:5000", bold_prefix="6. Abrir en navegador: ")
+    add_bullet(doc, "Admin: 'admin' / 'admin123' | Usuario: 'recepcion' / 'recepcion123'", bold_prefix="7. Credenciales: ")
+    add_bullet(doc, "pytest -v (ejecuta las 8 pruebas automatizadas)", bold_prefix="8. Ejecutar pruebas: ")
 
     out_file = os.path.join(DOCS_DIR, "Avance_2_LabControl_Prototipo_Funcional.docx")
     doc.save(out_file)
