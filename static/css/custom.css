@@ -1,38 +1,36 @@
 /* ==========================================================================
-   LabControl — Natural UI Design Direction
-   Estética clínica profesional, sobria, humana y visualmente fluida.
+   LabControl — BioSigLab Design System (UABC)
+   Inspirado y homologado al diseño de https://biosignal-lab.com.mx/
    ========================================================================== */
 
 :root {
-  /* Paleta Base: Tonos Acero, Pizarra y Neutros Suaves */
-  --c-header-bg: #1e293b;        /* Pizarra oscura natural */
-  --c-header-nav-active: #334155;
-  --c-header-border: #334155;
-  
-  --c-bg: #f8fafc;               /* Fondo general suave y descansado */
-  --c-surface: #ffffff;          /* Paneles y superficies blancas */
-  --c-surface-subtle: #f1f5f9;   /* Fondo alterno / cabeceras de tabla */
-  
-  --c-border: #e2e8f0;           /* Bordes finos y discretos */
-  --c-border-strong: #cbd5e1;    /* Bordes de controles e inputs */
-  --c-border-focus: #3b82f6;     /* Foco sutil */
+  /* Tokens Oficiales de BioSigLab */
+  --primary: #1a4a8a; 
+  --primary-dark: #1B4965; 
+  --accent: #4d91ff;
+  --accent-hover: #3b7ee8;
+  --text-light: #ffffff;
+  --text-dark: #1a202c;
+  --text-muted: #4a5568;
+  --bg-light: #f7fafc;
+  --radius: 16px;
+  --radius-sm: 8px;
+  --radius-pill: 100px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-  --c-text-title: #0f172a;       /* Titulares con buen contraste */
-  --c-text-body: #1e293b;        /* Texto de lectura general */
-  --c-text-secondary: #475569;   /* Textos secundarios y metadatos */
-  --c-text-muted: #64748b;       /* Etiquetas atenuadas */
+  /* Superficies y Bordes */
+  --c-bg: #f7fafc;
+  --c-surface: #ffffff;
+  --c-surface-subtle: #f1f5f9;
+  --c-border: #e2e8f0;
+  --c-border-strong: #cbd5e1;
 
-  /* Acento: Azul Acero Sobrio (No saturado) */
-  --c-accent: #2b4c6f;           /* Azul acero institucional */
-  --c-accent-hover: #1e3650;
-  --c-accent-light: #f0f5fa;
-
-  /* Estados de Muestra (Colores apagados, pasteles naturales) */
+  /* Estados de Muestra */
   --st-pending-text: #92400e;
   --st-pending-bg: #fefce8;
   --st-pending-border: #fef08a;
 
-  --st-received-text: #334155;
+  --st-received-text: #1e293b;
   --st-received-bg: #f1f5f9;
   --st-received-border: #e2e8f0;
 
@@ -43,23 +41,756 @@
   --st-complete-text: #166534;
   --st-complete-bg: #f0fdf4;
   --st-complete-border: #bbf7d0;
-
-  /* Radios de borde naturales */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-pill: 9999px;
 }
 
-/* Reset y Base */
+/* Tipografía Outfit y Base */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--c-bg);
-  color: var(--c-text-body);
-  font-size: 0.925rem;
-  line-height: 1.5;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
+
+/* ==========================================================================
+   Navegación Flotante Tipo Píldora (BioSigLab Navbar)
+   ========================================================================== */
+.navbar-biosig {
+  position: fixed;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.75rem !important;
+  background: rgba(27, 73, 101, 0.94) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 100px;
+  z-index: 1050;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: var(--transition);
+}
+
+.nav-spacer {
+  height: 95px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-text {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-badge {
+  background: linear-gradient(135deg, var(--accent), #6ba3ff);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(77, 145, 255, 0.35);
+}
+
+.navbar-biosig .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 0.925rem;
+  font-weight: 500;
+  padding: 0.45rem 0.95rem !important;
+  border-radius: 50px;
+  transition: var(--transition);
+}
+
+.navbar-biosig .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.navbar-biosig .nav-link.active {
+  color: #ffffff !important;
+  background: rgba(77, 145, 255, 0.35);
+}
+
+.user-pill {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  padding: 0.3rem 0.95rem;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Botones Estilo BioSigLab
+   ========================================================================== */
+.btn-primary {
+  background: var(--accent) !important;
+  border: none !important;
+  color: white !important;
+  padding: 12px 28px !important;
+  border-radius: 50px !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+  box-shadow: 0 10px 20px rgba(77, 145, 255, 0.3) !important;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(77, 145, 255, 0.42) !important;
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+  padding: 12px 28px !important;
+  border-radius: 50px !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+  display: inline-block;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  transform: translateY(-2px);
+  color: white !important;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(27, 73, 101, 0.2) !important;
+  color: var(--primary-dark) !important;
+  padding: 12px 28px !important;
+  border-radius: 50px !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+  display: inline-block;
+}
+
+.btn-secondary:hover {
+  background: #ffffff !important;
+  color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(27, 73, 101, 0.12);
+}
+
+.btn-steel {
+  background: var(--primary) !important;
+  color: white !important;
+  border-radius: 50px !important;
+  padding: 10px 24px !important;
+  border: none !important;
+  font-weight: 600 !important;
+  transition: var(--transition) !important;
+}
+
+.btn-steel:hover {
+  background: var(--primary-dark) !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Sección Hero (BioSigLab Style)
+   ========================================================================== */
+.hero-section {
+  position: relative;
+  min-height: 82vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-image: url('https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  margin-top: -95px;
+  padding: 140px 20px 80px;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(27, 73, 101, 0.93) 0%, rgba(26, 74, 138, 0.72) 100%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+  margin: 0 auto;
+  color: white;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.18;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+  font-size: 1.15rem;
+  opacity: 0.95;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Estadísticas Rápidas (Quick Stats Grid)
+   ========================================================================== */
+.quick-stats {
+  padding: 4rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.quick-stats-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.quick-stat {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-light);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: var(--transition);
+}
+
+.quick-stat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(27, 73, 101, 0.08);
+  border-color: rgba(77, 145, 255, 0.2);
+}
+
+.quick-stat strong {
+  display: block;
+  color: var(--primary);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.quick-stat span {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Sección Acerca de (About Section)
+   ========================================================================== */
+.about-section {
+  padding: 5rem 2rem;
+  background: #ffffff;
+}
+
+.about-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .about-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.about-text h2 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.about-text p {
+  color: var(--text-muted);
+  font-size: 0.975rem;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.about-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.about-image-card {
+  height: 380px;
+  border-radius: var(--radius);
+  background-image: url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=800&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 20px 40px rgba(27, 73, 101, 0.15);
+  overflow: hidden;
+}
+
+.about-image-overlay {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(27, 73, 101, 0.88) 0%, rgba(26, 74, 138, 0.68) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2.2rem;
+  color: white;
+}
+
+.about-image-overlay h3 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 10px 0;
+  line-height: 1.3;
+}
+
+.about-image-overlay p {
+  font-size: 0.925rem;
+  opacity: 0.95;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Sección Recursos / Catálogo de Tarjetas (Cards Grid)
+   ========================================================================== */
+.features-section {
+  padding: 5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.features-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.features-header h2 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin: 12px 0;
+}
+
+.features-header p {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  position: relative;
+  height: 360px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(27, 73, 101, 0.22);
+}
+
+.card-hem {
+  background: url('https://images.unsplash.com/photo-1530497610245-94d3c16cda28?q=80&w=600&auto=format&fit=crop') center/cover;
+}
+
+.card-bioq {
+  background: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600&auto=format&fit=crop') center/cover;
+}
+
+.card-inm {
+  background: url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=600&auto=format&fit=crop') center/cover;
+}
+
+.card-uro {
+  background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop') center/cover;
+}
+
+.card-content {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(27, 73, 101, 1) 0%, rgba(27, 73, 101, 0.85) 55%, transparent 100%);
+  color: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: var(--transition);
+}
+
+.feature-card:hover .card-content {
+  background: linear-gradient(to top, rgba(27, 73, 101, 1) 0%, rgba(27, 73, 101, 0.94) 75%, rgba(27, 73, 101, 0.5) 100%);
+}
+
+.card-content h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.card-divider {
+  border: none;
+  border-top: 2px solid rgba(255, 255, 255, 0.35);
+  margin: 8px 0 14px;
+  width: 42px;
+}
+
+.card-content p {
+  font-size: 0.9rem;
+  opacity: 0.92;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.card-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.825rem;
+  letter-spacing: 1px;
+  transition: var(--transition);
+}
+
+.card-link:hover {
+  color: white;
+}
+
+/* ==========================================================================
+   Panel de Consulta de Resultados (Estética BioSigLab)
+   ========================================================================== */
+.consulta-box-biosig {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid var(--c-border);
+  box-shadow: 0 15px 40px rgba(27, 73, 101, 0.08);
+  padding: 2.5rem 2rem;
+}
+
+.input-pill-group {
+  display: flex;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 100px;
+  padding: 4px;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.input-pill-group:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 145, 255, 0.2);
+}
+
+.input-pill-group input {
+  border: none;
+  background: transparent;
+  padding: 10px 20px;
+  font-size: 1.05rem;
+  color: var(--text-dark);
+  font-family: 'Outfit', monospace;
+  letter-spacing: 1px;
+  width: 100%;
+  outline: none;
+}
+
+/* ==========================================================================
+   Bloque Administrativo Inferior (BioSigLab Hero Gradient)
+   ========================================================================== */
+.block-admin-portal {
+  background: linear-gradient(160deg, var(--primary-dark) 0%, #1a4a8a 60%, #2d6cdf 100%);
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 18px 45px rgba(26, 74, 138, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-chip {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.credential-chip {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Footer Idéntico a BioSigLab
+   ========================================================================== */
+.site-footer {
+  background-color: var(--primary-dark);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 2.5rem 2rem;
+  font-size: 0.875rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.footer-admin-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: var(--transition);
+  padding: 6px 16px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+.footer-admin-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Componentes Clínicos (Tablas, Paneles, Trazabilidad)
+   ========================================================================== */
+.panel-clinical {
+  background-color: #ffffff;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.panel-header {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+}
+
+.workflow-strip {
+  display: flex;
+  border-bottom: 1px solid var(--c-border);
+  background-color: #f8fafc;
+}
+
+.workflow-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  border-right: 1px solid var(--c-border);
+}
+
+.workflow-step:last-child {
+  border-right: none;
+}
+
+.workflow-step .step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.workflow-step.completed .step-indicator {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.workflow-step.pending .step-indicator {
+  background-color: #cbd5e1;
+  color: #475569;
+}
+
+.step-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.step-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.table-clinical {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.table-clinical thead th {
+  background-color: #f8fafc;
+  color: var(--text-muted);
+  font-size: 0.775rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.table-clinical tbody td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--c-border);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.775rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.badge-status-pendiente {
+  background-color: var(--st-pending-bg);
+  color: var(--st-pending-text);
+  border-color: var(--st-pending-border);
+}
+
+.badge-status-recibida {
+  background-color: var(--st-received-bg);
+  color: var(--st-received-text);
+  border-color: var(--st-received-border);
+}
+
+.badge-status-analisis {
+  background-color: var(--st-analysis-bg);
+  color: var(--st-analysis-text);
+  border-color: var(--st-analysis-border);
+}
+
+.badge-status-completada {
+  background-color: var(--st-complete-bg);
+  color: var(--st-complete-text);
+  border-color: var(--st-complete-border);
+}
+
+.dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .workflow-strip {
+    flex-direction: column;
+  }
+  .workflow-step {
+    border-right: none;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .navbar-biosig {
+    width: calc(100% - 1.5rem);
+    padding: 0.6rem 1.25rem !important;
+  }
+  .hero-section {
+    min-height: 70vh;
+  }
+}
+
 
 /* Números tabulares para datos clínicos, fechas y precios */
 .font-tabular, table td, .stat-value, .code-tag {

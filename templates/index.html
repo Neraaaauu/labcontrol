@@ -1,553 +1,416 @@
 {% extends "base.html" %}
 
-{% block title %}LabControl — Laboratorio de Análisis Clínicos y Diagnóstico Especializado{% endblock %}
+{% block title %}LabControl — Laboratorio Clínico y Diagnóstico UABC{% endblock %}
 
 {% block content %}
-<!-- Aviso para usuarios con sesión clínica iniciada -->
+<!-- Aviso flotante si hay sesión activa -->
 {% if session.get('user_id') %}
-<div class="alert alert-info d-flex align-items-center justify-content-between py-2 px-3 mb-4 rounded-2 border">
-    <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-person-check-fill text-primary"></i>
-        <span>Sesión activa como <strong>{{ session.get('nombre_completo') }}</strong> (Rol: <span class="text-uppercase fw-semibold">{{ session.get('rol') }}</span>)</span>
+<div class="container my-3">
+    <div class="alert alert-info d-flex align-items-center justify-content-between py-2 px-3 rounded-pill border shadow-sm">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-check-fill text-primary"></i>
+            <span>Sesión activa como <strong>{{ session.get('nombre_completo') }}</strong> (<span class="text-uppercase fw-bold">{{ session.get('rol') }}</span>)</span>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn-primary py-1 px-3 small text-decoration-none">
+            Ir a tu Panel &rarr;
+        </a>
     </div>
-    <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-primary">
-        Ir a tu Panel de Trabajo &rarr;
-    </a>
 </div>
 {% endif %}
 
-<!-- Hero Section Principal -->
-<section class="hero-clinical">
-    <div class="row align-items-center g-4">
-        <div class="col-lg-8">
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="trust-badge-pill">
-                    <i class="bi bi-shield-check"></i> Cumplimiento NOM-007-SSA3-2011
-                </span>
-                <span class="trust-badge-pill">
-                    <i class="bi bi-award"></i> Calidad Analítica PEEC
-                </span>
-                <span class="trust-badge-pill">
-                    <i class="bi bi-clock-history"></i> Resultados en Línea 24/7
-                </span>
-            </div>
-            <h1 class="hero-title mb-3">
-                Resultados clínicos confiables con la precisión que tu salud merece.
-            </h1>
-            <p class="hero-subtitle mb-4">
-                En <strong>LabControl</strong> combinamos tecnología automatizada de última generación, supervisión permanente por Químicos Farmacobiólogos certificados y calidez humana en cada toma de muestra. Consulta y descarga tus resultados desde la comodidad de tu hogar.
-            </p>
-            <div class="d-flex flex-wrap gap-3">
-                <a href="#consulta" class="btn btn-steel px-4 py-2">
-                    <i class="bi bi-search me-1"></i> Consultar Mis Resultados
-                </a>
-                <a href="#servicios" class="btn btn-subtle px-4 py-2">
-                    <i class="bi bi-clipboard2-pulse me-1"></i> Ver Catálogo de Estudios
-                </a>
-            </div>
+<!-- Sección Hero (BioSigLab Style) -->
+<header class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>LabControl: Laboratorio de Análisis Clínicos y Diagnóstico Especializado</h1>
+        <p>Explora, visualiza y accede a tus resultados clínicos con precisión analítica y entrega 24/7</p>
+        <div class="hero-actions">
+            <a href="#consulta" class="btn-primary">Consultar resultados</a>
+            <a href="#about" class="btn-glass">Saber más</a>
         </div>
-        <div class="col-lg-4 text-center d-none d-lg-block">
-            <div class="p-4 bg-white rounded-3 border shadow-sm text-start">
-                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                    <div class="service-icon-box m-0">
-                        <i class="bi bi-hospital"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold text-dark">Atención y Tomas</div>
-                        <div class="small text-muted">Lunes a Sábado desde 6:30 AM</div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                    <div class="service-icon-box m-0" style="background-color: #f0fdf4; color: #166534;">
-                        <i class="bi bi-phone"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold text-dark">WhatsApp Clínico</div>
-                        <div class="small font-monospace text-muted">(664) 790-5678</div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="service-icon-box m-0" style="background-color: #fefce8; color: #854d0e;">
-                        <i class="bi bi-geo-alt"></i>
-                    </div>
-                    <div>
-                        <div class="fw-semibold text-dark">Sede Otay y Zona Río</div>
-                        <div class="small text-muted">Tijuana, Baja California</div>
-                    </div>
-                </div>
-            </div>
+    </div>
+</header>
+
+<!-- Estadísticas Rápidas (Quick Stats Grid) -->
+<section class="quick-stats">
+    <div class="quick-stats-grid">
+        <div class="quick-stat">
+            <strong>Acceso libre y en línea</strong>
+            <span>Consulta y descarga de resultados mediante folio único las 24 horas del día.</span>
+        </div>
+        <div class="quick-stat">
+            <strong>Enfoque regional UABC</strong>
+            <span>Compromiso universitario de salud al servicio de la población bajacaliforniana.</span>
+        </div>
+        <div class="quick-stat">
+            <strong>Rigor y calidad analítica</strong>
+            <span>Validación bioquímica estricta con norma NOM-007-SSA3-2011 y evaluación PEEC.</span>
         </div>
     </div>
 </section>
 
-<!-- SECCIÓN 1: CONSULTA DE RESULTADOS POR FOLIO (Portal Pacientes) -->
-<section id="consulta" class="mb-5 pt-2">
-    <div class="panel-clinical p-4 shadow-sm border-2">
-        <div class="text-center mb-4">
-            <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-1 rounded-pill mb-2">Portal del Paciente</span>
-            <h2 class="h4 fw-bold text-dark mb-1">Consulta y Descarga de Resultados</h2>
-            <p class="text-muted small mb-0">Ingresa el código o número de folio único impreso en tu comprobante de toma.</p>
-        </div>
+<!-- SECCIÓN: CONSULTA DE RESULTADOS POR FOLIO (Portal Pacientes) -->
+<section id="consulta" class="py-5" style="background: #ffffff; border-bottom: 1px solid var(--c-border);">
+    <div class="container" style="max-width: 1060px;">
+        <div class="consulta-box-biosig">
+            <div class="text-center mb-4">
+                <p class="eyebrow">Portal de Pacientes</p>
+                <h2 class="fw-bold" style="color: var(--primary-dark); font-size: 2.2rem;">Consulta y Descarga de Resultados</h2>
+                <p class="text-muted" style="font-size: 1rem;">Ingresa el número de folio único impreso en tu comprobante de toma para visualizar tu reporte clínico.</p>
+            </div>
 
-        <!-- Formulario de Búsqueda -->
-        <div class="row justify-content-center mb-3">
-            <div class="col-12 col-md-9 col-lg-7">
-                <form method="POST" action="{{ url_for('index') }}#consulta" class="mb-3">
-                    <div class="input-group input-group-lg">
-                        <span class="input-group-text bg-white border-end-0 text-muted">
-                            <i class="bi bi-upc-scan"></i>
-                        </span>
-                        <input type="text" name="codigo" class="form-control border-start-0 border-end-0 font-monospace text-uppercase" 
-                               placeholder="Ej. ORD-2026-1001" value="{{ codigo_buscado }}" required autofocus>
-                        <button type="submit" class="btn btn-steel px-4">
-                            <i class="bi bi-arrow-right-circle me-1"></i> Consultar Folio
-                        </button>
-                    </div>
-                </form>
+            <!-- Formulario con Buscador Tipo Píldora -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-12 col-md-10 col-lg-8">
+                    <form method="POST" action="{{ url_for('index') }}#consulta" class="mb-3">
+                        <div class="input-pill-group">
+                            <span class="ps-3 d-flex align-items-center text-muted">
+                                <i class="bi bi-search fs-5"></i>
+                            </span>
+                            <input type="text" name="codigo" placeholder="Ej. ORD-2026-1001" value="{{ codigo_buscado }}" required autofocus>
+                            <button type="submit" class="btn-primary">
+                                Consultar Folio
+                            </button>
+                        </div>
+                    </form>
 
-                <!-- Chips para pruebas rápidas de demostración -->
-                <div class="p-2 bg-light rounded border">
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <span class="small text-muted fw-semibold" style="font-size: 0.75rem; text-transform: uppercase;">Folios de demostración:</span>
-                        <a href="{{ url_for('index', codigo='ORD-2026-1001') }}#consulta" class="badge-status badge-status-completada text-decoration-none" title="Ver orden completada con informe listo">
+                    <!-- Chips de Demostración para Evaluación Rápida -->
+                    <div class="p-3 bg-light rounded-4 border d-flex flex-wrap align-items-center justify-content-center gap-2">
+                        <span class="small text-muted fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">Folios de demostración:</span>
+                        <a href="{{ url_for('index', codigo='ORD-2026-1001') }}#consulta" class="badge-status badge-status-completada text-decoration-none">
                             ORD-2026-1001 (Resultados Listos)
                         </a>
-                        <a href="{{ url_for('index', codigo='ORD-2026-1002') }}#consulta" class="badge-status badge-status-analisis text-decoration-none" title="Ver orden en proceso analítico">
+                        <a href="{{ url_for('index', codigo='ORD-2026-1002') }}#consulta" class="badge-status badge-status-analisis text-decoration-none">
                             ORD-2026-1002 (En Análisis)
                         </a>
-                        <a href="{{ url_for('index', codigo='ORD-2026-1003') }}#consulta" class="badge-status badge-status-recibida text-decoration-none" title="Ver orden con muestra recibida">
+                        <a href="{{ url_for('index', codigo='ORD-2026-1003') }}#consulta" class="badge-status badge-status-recibida text-decoration-none">
                             ORD-2026-1003 (Muestra Recibida)
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Resultados de la Consulta -->
-        {% if orden %}
-        <div class="mt-4 pt-3 border-top">
-            <div class="panel-clinical mb-3">
-                <div class="panel-header bg-light">
-                    <div>
-                        <span class="small text-muted text-uppercase" style="font-size: 0.725rem; letter-spacing: 0.04em;">Expediente Clínico:</span>
-                        <div class="h5 fw-bold font-monospace mb-0 text-dark">{{ orden.codigo_orden }}</div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        {% if orden.estado_orden == 'Pendiente' %}
-                            <span class="badge-status badge-status-pendiente"><span class="dot-indicator"></span> Pendiente de Toma</span>
-                        {% elif orden.estado_orden == 'Muestra Recibida' %}
-                            <span class="badge-status badge-status-recibida"><span class="dot-indicator"></span> Muestra en Laboratorio</span>
-                        {% elif orden.estado_orden == 'En Análisis' %}
-                            <span class="badge-status badge-status-analisis"><span class="dot-indicator"></span> Procesamiento Bioquímico</span>
-                        {% elif orden.estado_orden == 'Completada' %}
-                            <span class="badge-status badge-status-completada"><span class="dot-indicator"></span> Resultados Validados</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ orden.estado_orden }}</span>
-                        {% endif %}
-
-                        {% if orden.estado_orden == 'Completada' %}
-                        <a href="{{ url_for('reporte_publico_impreso', codigo=orden.codigo_orden) }}" target="_blank" class="btn btn-sm btn-success">
-                            <i class="bi bi-printer me-1"></i> Imprimir Reporte Oficial
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Resumen de Datos del Paciente -->
-                <div class="p-3 bg-white border-bottom">
-                    <div class="row g-3 small">
-                        <div class="col-sm-6 col-md-3">
-                            <span class="text-muted d-block">Paciente:</span>
-                            <strong class="text-dark">{{ orden.paciente_nombre }}</strong>
-                        </div>
-                        <div class="col-sm-6 col-md-3">
-                            <span class="text-muted d-block">CURP:</span>
-                            <span class="font-monospace">{{ orden.paciente_curp or 'No registrada' }}</span>
-                        </div>
-                        <div class="col-sm-6 col-md-3">
-                            <span class="text-muted d-block">Fecha de Toma / Registro:</span>
-                            <span>{{ orden.fecha_toma_muestra or orden.creado_en }}</span>
-                        </div>
-                        <div class="col-sm-6 col-md-3">
-                            <span class="text-muted d-block">Emisión de Resultados:</span>
-                            <span class="text-success fw-semibold">{{ orden.fecha_completada or 'En proceso analítico' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tira de Trazabilidad del Flujo Clínico -->
-                <div class="workflow-strip">
-                    <div class="workflow-step completed">
-                        <span class="step-indicator"><i class="bi bi-check"></i></span>
+            <!-- Despliegue de Resultados -->
+            {% if orden %}
+            <div class="mt-4 pt-4 border-top">
+                <div class="panel-clinical overflow-hidden">
+                    <div class="panel-header bg-light">
                         <div>
-                            <div class="step-title">1. Solicitud Registrada</div>
-                            <div class="step-meta font-tabular">{{ orden.creado_en[:16] if orden.creado_en else 'Completado' }}</div>
+                            <p class="eyebrow m-0">Folio de Orden</p>
+                            <div class="h4 fw-bold font-monospace text-dark m-0">{{ orden.codigo_orden }}</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if orden.estado_orden == 'Pendiente' %}
+                                <span class="badge-status badge-status-pendiente"><span class="dot-indicator"></span> Pendiente de Toma</span>
+                            {% elif orden.estado_orden == 'Muestra Recibida' %}
+                                <span class="badge-status badge-status-recibida"><span class="dot-indicator"></span> Muestra Recibida</span>
+                            {% elif orden.estado_orden == 'En Análisis' %}
+                                <span class="badge-status badge-status-analisis"><span class="dot-indicator"></span> En Análisis Bioquímico</span>
+                            {% elif orden.estado_orden == 'Completada' %}
+                                <span class="badge-status badge-status-completada"><span class="dot-indicator"></span> Resultados Validados</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ orden.estado_orden }}</span>
+                            {% endif %}
+
+                            {% if orden.estado_orden == 'Completada' %}
+                            <a href="{{ url_for('reporte_publico_impreso', codigo=orden.codigo_orden) }}" target="_blank" class="btn-primary py-2 px-3 small text-decoration-none">
+                                <i class="bi bi-printer-fill me-1"></i> Imprimir Reporte Oficial
+                            </a>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="workflow-step {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}completed{% else %}pending{% endif %}">
-                        <span class="step-indicator">
-                            {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}<i class="bi bi-check"></i>{% else %}2{% endif %}
-                        </span>
-                        <div>
-                            <div class="step-title">2. Muestra Recibida</div>
-                            <div class="step-meta font-tabular">
-                                {{ orden.fecha_recepcion_muestra[:16] if orden.fecha_recepcion_muestra else 'Pendiente' }}
+
+                    <!-- Datos del Paciente -->
+                    <div class="p-3 bg-white border-bottom">
+                        <div class="row g-3 small">
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Paciente:</span>
+                                <strong class="text-dark fs-6">{{ orden.paciente_nombre }}</strong>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">CURP:</span>
+                                <span class="font-monospace fw-semibold">{{ orden.paciente_curp or 'No registrada' }}</span>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Fecha de Toma:</span>
+                                <span>{{ orden.fecha_toma_muestra or orden.creado_en }}</span>
+                            </div>
+                            <div class="col-sm-6 col-md-3">
+                                <span class="text-muted d-block">Estado de Emisión:</span>
+                                <span class="text-success fw-bold">{{ orden.fecha_completada or 'En proceso analítico' }}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="workflow-step {% if orden.estado_orden in ['En Análisis', 'Completada'] %}completed{% else %}pending{% endif %}">
-                        <span class="step-indicator">
-                            {% if orden.estado_orden in ['En Análisis', 'Completada'] %}<i class="bi bi-check"></i>{% else %}3{% endif %}
-                        </span>
-                        <div>
-                            <div class="step-title">3. Análisis Bioquímico</div>
-                            <div class="step-meta">
-                                {% if orden.estado_orden == 'En Análisis' %}En analizador automatizado{% elif orden.estado_orden == 'Completada' %}Finalizado{% else %}En espera{% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="workflow-step {% if orden.estado_orden == 'Completada' %}completed{% else %}pending{% endif %}">
-                        <span class="step-indicator">
-                            {% if orden.estado_orden == 'Completada' %}<i class="bi bi-check"></i>{% else %}4{% endif %}
-                        </span>
-                        <div>
-                            <div class="step-title">4. Resultados Validados</div>
-                            <div class="step-meta font-tabular">
-                                {{ orden.fecha_completada[:16] if orden.fecha_completada else 'En espera' }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Tabla de Estudios y Parámetros Obtenidos -->
-                <div class="table-responsive">
-                    <table class="table-clinical">
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Estudio Clínico</th>
-                                <th>Tipo de Muestra</th>
-                                <th>Estado</th>
-                                <th>Parámetros y Resultados Analíticos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for est in estudios_orden %}
-                            <tr>
-                                <td><span class="badge bg-light text-dark border font-monospace">{{ est.codigo }}</span></td>
-                                <td>
-                                    <div class="fw-semibold text-dark">{{ est.nombre }}</div>
-                                    <small class="text-muted">{{ est.categoria }}</small>
-                                </td>
-                                <td><small class="text-secondary">{{ est.tipo_muestra }}</small></td>
-                                <td>
-                                    {% if est.estado_estudio == 'Completado' or orden.estado_orden == 'Completada' %}
-                                        <span class="badge-status badge-status-completada"><span class="dot-indicator"></span> Listo</span>
-                                    {% elif est.estado_estudio == 'En Análisis' or orden.estado_orden == 'En Análisis' %}
-                                        <span class="badge-status badge-status-analisis"><span class="dot-indicator"></span> Procesando</span>
-                                    {% else %}
-                                        <span class="badge-status badge-status-recibida"><span class="dot-indicator"></span> Muestra en cola</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if est.resultado_texto %}
-                                        <div class="p-2 rounded bg-light border font-monospace small text-dark mb-1">
-                                            {{ est.resultado_texto }}
-                                        </div>
-                                        {% if est.valores_referencia %}
-                                            <small class="text-muted d-block" style="font-size: 0.75rem;">
-                                                <i class="bi bi-info-circle me-1"></i><strong>Referencia:</strong> {{ est.valores_referencia }}
-                                            </small>
+                    <!-- Tira de Trazabilidad Clínica (4 Fases) -->
+                    <div class="workflow-strip">
+                        <div class="workflow-step completed">
+                            <span class="step-indicator"><i class="bi bi-check"></i></span>
+                            <div>
+                                <div class="step-title">1. Solicitud Registrada</div>
+                                <div class="step-meta font-tabular">{{ orden.creado_en[:16] if orden.creado_en else 'Completado' }}</div>
+                            </div>
+                        </div>
+                        <div class="workflow-step {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}completed{% else %}pending{% endif %}">
+                            <span class="step-indicator">
+                                {% if orden.estado_orden in ['Muestra Recibida', 'En Análisis', 'Completada'] %}<i class="bi bi-check"></i>{% else %}2{% endif %}
+                            </span>
+                            <div>
+                                <div class="step-title">2. Muestra Recibida</div>
+                                <div class="step-meta font-tabular">
+                                    {{ orden.fecha_recepcion_muestra[:16] if orden.fecha_recepcion_muestra else 'Pendiente' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="workflow-step {% if orden.estado_orden in ['En Análisis', 'Completada'] %}completed{% else %}pending{% endif %}">
+                            <span class="step-indicator">
+                                {% if orden.estado_orden in ['En Análisis', 'Completada'] %}<i class="bi bi-check"></i>{% else %}3{% endif %}
+                            </span>
+                            <div>
+                                <div class="step-title">3. Análisis Bioquímico</div>
+                                <div class="step-meta">
+                                    {% if orden.estado_orden == 'En Análisis' %}En analizador automatizado{% elif orden.estado_orden == 'Completada' %}Finalizado{% else %}En espera{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="workflow-step {% if orden.estado_orden == 'Completada' %}completed{% else %}pending{% endif %}">
+                            <span class="step-indicator">
+                                {% if orden.estado_orden == 'Completada' %}<i class="bi bi-check"></i>{% else %}4{% endif %}
+                            </span>
+                            <div>
+                                <div class="step-title">4. Resultados Validados</div>
+                                <div class="step-meta font-tabular">
+                                    {{ orden.fecha_completada[:16] if orden.fecha_completada else 'En espera' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Estudios y Resultados -->
+                    <div class="table-responsive">
+                        <table class="table-clinical">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Estudio Clínico</th>
+                                    <th>Tipo de Muestra</th>
+                                    <th>Estado</th>
+                                    <th>Parámetros Analíticos Obtenidos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for est in estudios_orden %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border font-monospace">{{ est.codigo }}</span></td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ est.nombre }}</div>
+                                        <small class="text-muted">{{ est.categoria }}</small>
+                                    </td>
+                                    <td><small class="text-secondary">{{ est.tipo_muestra }}</small></td>
+                                    <td>
+                                        {% if est.estado_estudio == 'Completado' or orden.estado_orden == 'Completada' %}
+                                            <span class="badge-status badge-status-completada"><span class="dot-indicator"></span> Listo</span>
+                                        {% elif est.estado_estudio == 'En Análisis' or orden.estado_orden == 'En Análisis' %}
+                                            <span class="badge-status badge-status-analisis"><span class="dot-indicator"></span> Procesando</span>
+                                        {% else %}
+                                            <span class="badge-status badge-status-recibida"><span class="dot-indicator"></span> En cola</span>
                                         {% endif %}
-                                    {% else %}
-                                        <span class="text-muted small fst-italic">
-                                            <i class="bi bi-hourglass-split me-1"></i> Procesando en analizador clínico. En breve aparecerán aquí sus valores.
-                                        </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                {% if orden.estado_orden == 'Completada' %}
-                <div class="p-3 bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div class="small text-muted">
-                        <i class="bi bi-patch-check-fill text-success me-1"></i> Resultados avalados por <strong>QFB. Carlos Méndez</strong> (Céd. Prof. 8472910 UABC).
+                                    </td>
+                                    <td>
+                                        {% if est.resultado_texto %}
+                                            <div class="p-2 rounded-3 bg-light border font-monospace small text-dark mb-1">
+                                                {{ est.resultado_texto }}
+                                            </div>
+                                            {% if est.valores_referencia %}
+                                                <small class="text-muted d-block" style="font-size: 0.775rem;">
+                                                    <i class="bi bi-info-circle me-1"></i><strong>Referencia:</strong> {{ est.valores_referencia }}
+                                                </small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted small fst-italic">
+                                                <i class="bi bi-hourglass-split me-1"></i> Procesando en analizador clínico. En breve aparecerán aquí tus resultados.
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="{{ url_for('reporte_publico_impreso', codigo=orden.codigo_orden) }}" target="_blank" class="btn btn-steel btn-sm px-3">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Abrir Hoja Clínica Oficial
+
+                    {% if orden.estado_orden == 'Completada' %}
+                    <div class="p-3 bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="small text-muted">
+                            <i class="bi bi-patch-check-fill text-success me-1"></i> Resultados avalados por <strong>QFB. Carlos Méndez</strong> (Céd. Prof. 8472910 UABC).
+                        </div>
+                        <a href="{{ url_for('reporte_publico_impreso', codigo=orden.codigo_orden) }}" target="_blank" class="btn-primary py-1 px-3 small text-decoration-none">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Ver Hoja Clínica Oficial
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif codigo_buscado %}
+            <div class="alert alert-warning mt-4 text-center py-3 rounded-4 shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill fs-4 d-block mb-2 text-warning"></i>
+                No se encontró ninguna orden con el folio <strong>"{{ codigo_buscado }}"</strong>.<br>
+                <span class="small text-muted">Verifique que haya ingresado el código completo tal como aparece en su ticket (Ejemplo: ORD-2026-1001).</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- SECCIÓN ACERCA DE (About Section BioSigLab Style) -->
+<section id="about" class="about-section">
+    <div class="about-container">
+        <div class="about-text">
+            <p class="eyebrow">Sobre el proyecto</p>
+            <h2>¿Qué es LabControl?</h2>
+            <p>Bienvenidos a nuestra plataforma clínica y colaborativa diseñada para optimizar el diagnóstico médico, la docencia y la investigación en salud de la Universidad Autónoma de Baja California.</p>
+            <p>LabControl centraliza el flujo de trabajo de análisis clínicos: desde la recepción y rotulación física de muestras con códigos de barras, hasta la cuantificación automatizada en analizadores Mindray y Cobas, validación por Químicos Farmacobiólogos titulados y entrega inmediata a pacientes en línea.</p>
+            <div class="about-actions">
+                <a href="#resources" class="btn-primary">Ver catálogo de estudios</a>
+                <a href="#sucursales" class="btn-secondary">Nuestras sedes</a>
+            </div>
+        </div>
+        <div class="about-image-card">
+            <div class="about-image-overlay">
+                <p class="eyebrow" style="color: #6ba3ff;">Impacto clínico</p>
+                <h3>Diagnósticos oportunos con certeza analítica para Baja California</h3>
+                <p>Una plataforma diseñada para agilizar la entrega de resultados y respaldar la toma de decisiones médicas con la máxima precisión.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECCIÓN RECURSOS / CATÁLOGO (Cards Grid BioSigLab Style) -->
+<section id="resources" class="features-section">
+    <div class="features-header">
+        <p class="eyebrow">Recursos</p>
+        <h2>Catálogo de Estudios Clínicos</h2>
+        <p>Accede a nuestro catálogo de pruebas de laboratorio, indicaciones de preparación y áreas analíticas.</p>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Tarjeta 1: Hematología -->
+        <article class="feature-card card-hem" onclick="window.location.href='#consulta'">
+            <div class="card-content">
+                <h3>Hematología</h3>
+                <hr class="card-divider">
+                <p>Biometría hemática completa de 5 partes, tiempos de coagulación y recuento plaquetario con entrega en 6 a 12 horas.</p>
+                <a href="#consulta" class="card-link">Ver estudios →</a>
+            </div>
+        </article>
+
+        <!-- Tarjeta 2: Bioquímica -->
+        <article class="feature-card card-bioq" onclick="window.location.href='#consulta'">
+            <div class="card-content">
+                <h3>Bioquímica Clínica</h3>
+                <hr class="card-divider">
+                <p>Química de 6, 24 y 36 elementos: Glucosa, Urea, Creatinina, Ácido Úrico, Perfil Lipídico y Pruebas Hepáticas.</p>
+                <a href="#consulta" class="card-link">Ver perfiles →</a>
+            </div>
+        </article>
+
+        <!-- Tarjeta 3: Inmunología -->
+        <article class="feature-card card-inm" onclick="window.location.href='#consulta'">
+            <div class="card-content">
+                <h3>Inmunología & Hormonas</h3>
+                <hr class="card-divider">
+                <p>Perfil tiroideo integral (TSH, T3, T4), Hemoglobina Glucosilada HbA1c y Antígeno Prostático PSA.</p>
+                <a href="#consulta" class="card-link">Conocer pruebas →</a>
+            </div>
+        </article>
+
+        <!-- Tarjeta 4: Uroanálisis & Checkups -->
+        <article class="feature-card card-uro" onclick="window.location.href='#consulta'">
+            <div class="card-content">
+                <h3>Uroanálisis & Check-ups</h3>
+                <hr class="card-divider">
+                <p>Examen general de orina automatizado por citometría de flujo, urocultivos y paquetes preventivos ejecutivos.</p>
+                <a href="#consulta" class="card-link">Ver paquetes →</a>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- SECCIÓN SUCURSALES Y CONTACTO -->
+<section id="sucursales" class="py-5" style="background: #ffffff; border-top: 1px solid var(--c-border); border-bottom: 1px solid var(--c-border);">
+    <div class="container" style="max-width: 1100px;">
+        <div class="text-center mb-5">
+            <p class="eyebrow">Contacto y Sedes</p>
+            <h2 class="fw-bold" style="color: var(--primary-dark); font-size: 2.2rem;">Nuestras Sucursales en Tijuana</h2>
+            <p class="text-muted">Instalaciones climatizadas, tomas pediátricas especializadas y servicio a domicilio.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-4 bg-light rounded-4 border h-100 shadow-sm">
+                    <span class="badge bg-primary text-white mb-2 px-3 py-1 rounded-pill">Sede Matriz Otay</span>
+                    <h3 class="h5 fw-bold text-dark mt-2 mb-1">Calzada Tecnológico #2050</h3>
+                    <p class="text-muted small mb-3">Mesa de Otay (Frente a UABC FCQI), Tijuana, B.C.</p>
+                    <div class="small text-secondary mb-2">
+                        <i class="bi bi-clock-fill text-primary me-2"></i><strong>Lunes a Viernes:</strong> 6:30 AM – 7:30 PM | <strong>Sábados:</strong> 7:00 AM – 2:30 PM
+                    </div>
+                    <div class="small text-secondary">
+                        <i class="bi bi-telephone-fill text-primary me-2"></i><strong>Teléfono Directo:</strong> (664) 682-1000
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-4 bg-light rounded-4 border h-100 shadow-sm">
+                    <span class="badge bg-secondary text-white mb-2 px-3 py-1 rounded-pill">Sede Zona Río</span>
+                    <h3 class="h5 fw-bold text-dark mt-2 mb-1">Paseo de los Héroes #9211</h3>
+                    <p class="text-muted small mb-3">Zona Urbana Río (Área Médica y Hospitalaria), Tijuana, B.C.</p>
+                    <div class="small text-secondary mb-2">
+                        <i class="bi bi-clock-fill text-primary me-2"></i><strong>Lunes a Viernes:</strong> 7:00 AM – 7:00 PM | <strong>Urgencias:</strong> 24 Horas
+                    </div>
+                    <div class="small text-secondary">
+                        <i class="bi bi-whatsapp text-success me-2"></i><strong>WhatsApp Cotizaciones:</strong> (664) 790-5678
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BLOQUE INFERIOR: ACCESO AL PANEL ADMINISTRATIVO (BioSigLab Hero Gradient Style) -->
+<section class="py-5" style="background: var(--bg-light);">
+    <div class="container" style="max-width: 1100px;">
+        <div class="block-admin-portal shadow-lg">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="hero-chip">Personal Clínico Autorizado</span>
+                    <h2 class="fw-bold mb-3" style="font-size: 1.85rem; color: #ffffff;">
+                        Portal de Control Clínico y Panel Administrativo
+                    </h2>
+                    <p class="mb-4 text-white-50" style="font-size: 1rem; line-height: 1.6;">
+                        Acceso reservado para recepción, químicos analistas y directores médicos del laboratorio para captura de pacientes con autocompletado por API, emisión de órdenes, registro de muestras y validación analítica.
+                    </p>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-light me-1" style="font-size: 0.8rem;">Cuentas demo activas:</span>
+                        <span class="credential-chip">
+                            Admin Químico: <strong>admin</strong> / <strong>admin123</strong>
+                        </span>
+                        <span class="credential-chip">
+                            Recepción: <strong>recepcion</strong> / <strong>recepcion123</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end text-center">
+                    {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-primary py-3 px-4 fw-bold shadow-sm text-decoration-none d-inline-block" style="background: #ffffff !important; color: var(--primary-dark) !important;">
+                        <i class="bi bi-speedometer2 me-2"></i> Ir a tu Panel Administrativo &rarr;
                     </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% elif codigo_buscado %}
-        <div class="alert alert-warning mt-4 mb-0 text-center py-3 rounded-2">
-            <i class="bi bi-exclamation-triangle-fill fs-5 d-block mb-2 text-warning"></i>
-            No se encontró ninguna orden con el folio <strong>"{{ codigo_buscado }}"</strong>.<br>
-            <span class="small text-muted">Verifique que haya ingresado el código completo tal como aparece en su ticket (Ej. ORD-2026-1001). Si la muestra fue tomada hace pocos minutos, consulte nuevamente en breve.</span>
-        </div>
-        {% endif %}
-    </div>
-</section>
-
-<!-- SECCIÓN 2: CATÁLOGO DE SERVICIOS Y ESPECIALIDADES ("Info sacada de la cola") -->
-<section id="servicios" class="mb-5 pt-3">
-    <div class="text-center mb-4 pb-2">
-        <span class="badge bg-secondary-subtle text-secondary fw-semibold px-3 py-1 rounded-pill mb-2">Servicios Integrales</span>
-        <h2 class="h3 fw-bold text-dark mb-1">Catálogo de Estudios y Diagnóstico Especializado</h2>
-        <p class="text-muted small mx-auto" style="max-width: 680px;">
-            Contamos con más de 120 pruebas clínicas y perfiles preventivos diseñados para el monitoreo preciso de tu bienestar en todas las etapas de la vida.
-        </p>
-    </div>
-
-    <div class="row g-4">
-        <!-- Servicio 1 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box">
-                    <i class="bi bi-droplet-half"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Hematología Diagnóstica</h3>
-                <p class="small text-muted mb-3">
-                    Biometría hemática completa de 5 partes, frotis de sangre periférica, velocidad de sedimentación globular y tiempos de coagulación (TP, TTP, Fibrinógeno).
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Entrega: 6 a 12 hrs</span>
-                    <span class="badge bg-light text-dark border">Tubo EDTA</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Servicio 2 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box" style="background-color: #f0fdf4; color: #166534;">
-                    <i class="bi bi-activity"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Bioquímica Clínica & Metabólica</h3>
-                <p class="small text-muted mb-3">
-                    Química sanguínea de 6, 24 y 36 elementos: Glucosa, Urea, Creatinina, Ácido Úrico, Perfil Lipídico (Colesterol, Triglicéridos, HDL, LDL) y Pruebas Hepáticas.
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Entrega: Mismo día</span>
-                    <span class="badge bg-light text-dark border">Ayuno 8-12 hrs</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Servicio 3 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box" style="background-color: #fefce8; color: #854d0e;">
-                    <i class="bi bi-shield-plus"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Inmunología & Endocrinología</h3>
-                <p class="small text-muted mb-3">
-                    Perfil tiroideo integral (TSH, T3 libre, T4 libre), Hemoglobina Glucosilada HbA1c para control diabético, Antígeno Prostático PSA y pruebas serológicas.
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Entrega: 12 a 24 hrs</span>
-                    <span class="badge bg-light text-dark border">Suero venoso</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Servicio 4 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box" style="background-color: #faf5ff; color: #7e22ce;">
-                    <i class="bi bi-virus"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Microbiología & Uroanálisis</h3>
-                <p class="small text-muted mb-3">
-                    Examen general de orina automatizado por citometría de flujo, urocultivo con antibiograma, coproparasitoscópico seriado y exudados faríngeos.
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Entrega: 24 a 48 hrs</span>
-                    <span class="badge bg-light text-dark border">Frasco estéril</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Servicio 5 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box" style="background-color: #fff1f2; color: #be123c;">
-                    <i class="bi bi-heart-pulse"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Perfiles Preventivos (Check-Ups)</h3>
-                <p class="small text-muted mb-3">
-                    Paquetes de chequeo general preventivo: Check-up Básico, Check-up Ejecutivo Integral, Perfil Prenatal Completo y Perfil Geriátrico con descuento especial.
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Ahorro del 25%</span>
-                    <span class="badge bg-light text-dark border">Informe gráfico</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Servicio 6 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-service-clinical">
-                <div class="service-icon-box" style="background-color: #ecfeff; color: #0e7490;">
-                    <i class="bi bi-house-door"></i>
-                </div>
-                <h3 class="h6 fw-bold text-dark mb-2">Toma de Muestra a Domicilio</h3>
-                <p class="small text-muted mb-3">
-                    Personal de flebotomía certificado acude a tu hogar o empresa con material estéril desechable. Servicio prioritario para adultos mayores o personas con movilidad limitada.
-                </p>
-                <div class="small text-secondary fw-medium">
-                    <span class="badge bg-light text-dark border">Sin costo zona urbana</span>
-                    <span class="badge bg-light text-dark border">Previa cita</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- SECCIÓN 3: POR QUÉ ELEGIRNOS Y PREPARACIÓN -->
-<section class="mb-5">
-    <div class="row g-4">
-        <!-- Garantías de Calidad -->
-        <div class="col-lg-6">
-            <div class="panel-clinical p-4 h-100">
-                <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-patch-check text-primary"></i> Compromiso de Calidad y Confidencialidad
-                </h3>
-                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
-                    <li class="d-flex align-items-start gap-2">
-                        <i class="bi bi-check2-circle text-success fs-5 mt-n1"></i>
-                        <div>
-                            <strong class="text-dark">Analizadores Automatizados Mindray y Cobas:</strong>
-                            <div class="text-muted small">Equipamiento con lectura óptica por código de barras bidimensional que elimina al 100% el error humano de rotulación.</div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-start gap-2">
-                        <i class="bi bi-check2-circle text-success fs-5 mt-n1"></i>
-                        <div>
-                            <strong class="text-dark">Validación por Químicos Farmacobiólogos:</strong>
-                            <div class="text-muted small">Cada informe clínico es revisado y validado individualmente por químicos colegiados antes de liberarse al portal.</div>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-start gap-2">
-                        <i class="bi bi-check2-circle text-success fs-5 mt-n1"></i>
-                        <div>
-                            <strong class="text-dark">Seguridad de Datos Clínicos:</strong>
-                            <div class="text-muted small">Protección del expediente médico electrónico conforme a la NOM-004-SSA3-2012 y cifrado de comunicación en tránsito.</div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Instrucciones para el Paciente -->
-        <div class="col-lg-6">
-            <div class="panel-clinical p-4 h-100">
-                <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-info-circle text-primary"></i> Guía Rápida para tu Toma de Muestra
-                </h3>
-                <div class="d-flex flex-column gap-3 small text-secondary">
-                    <div class="p-2 bg-light rounded border">
-                        <strong class="text-dark d-block mb-1">⏱️ Horas de Ayuno Requeridas:</strong>
-                        Para Biometría Hemática se aconsejan 4 a 6 horas. Para Química Sanguínea y Perfil Lipídico se requiere un ayuno estricto de 8 a 12 horas (agua simple permitida).
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-primary py-3 px-4 fw-bold shadow-sm text-decoration-none d-inline-block" style="background: #ffffff !important; color: var(--primary-dark) !important;">
+                        <i class="bi bi-box-arrow-in-right me-2 text-primary"></i> Ingresar al Panel Administrativo &rarr;
+                    </a>
+                    <div class="mt-2">
+                        <small class="text-white-50" style="font-size: 0.75rem;">Acceso cifrado con control de roles</small>
                     </div>
-                    <div class="p-2 bg-light rounded border">
-                        <strong class="text-dark d-block mb-1">🧪 Muestras de Orina (EGO):</strong>
-                        Recolecta la primera micción de la mañana en frasco estéril nuevo. Desecha el primer chorro y llena el frasco a dos tercios de capacidad.
-                    </div>
-                    <div class="p-2 bg-light rounded border">
-                        <strong class="text-dark d-block mb-1">💊 Medicamentos Habituales:</strong>
-                        No suspendas tu medicación para la presión o corazón salvo indicación expresa de tu médico tratante. Comunica cualquier tratamiento al recepcionista.
-                    </div>
+                    {% endif %}
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- SECCIÓN 4: SUCURSALES Y HORARIOS -->
-<section id="sucursales" class="mb-5">
-    <div class="panel-clinical p-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-lg-4 border-end-lg">
-                <h3 class="h5 fw-bold text-dark mb-2">Sucursales y Atención</h3>
-                <p class="text-muted small mb-3">
-                    Instalaciones climatizadas, estacionamiento gratuito y tomas pediátricas especializadas.
-                </p>
-                <div class="small text-secondary mb-2">
-                    <i class="bi bi-telephone-fill text-primary me-2"></i><strong>Central Telefónica:</strong> (664) 682-1000
-                </div>
-                <div class="small text-secondary">
-                    <i class="bi bi-whatsapp text-success me-2"></i><strong>WhatsApp Cotizaciones:</strong> (664) 790-5678
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-                <div class="p-3 bg-light rounded border h-100">
-                    <div class="badge bg-primary text-white mb-2">Sucursal Matriz Otay</div>
-                    <div class="fw-semibold text-dark mb-1">Calzada Tecnológico #2050</div>
-                    <div class="small text-muted mb-2">Mesa de Otay (Frente a UABC FCQI), Tijuana, B.C.</div>
-                    <div class="small text-secondary">
-                        <i class="bi bi-clock me-1"></i> Lunes a Viernes: 6:30 AM – 7:30 PM<br>
-                        <i class="bi bi-clock me-1"></i> Sábados: 7:00 AM – 2:30 PM
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-                <div class="p-3 bg-light rounded border h-100">
-                    <div class="badge bg-secondary text-white mb-2">Sucursal Zona Río</div>
-                    <div class="fw-semibold text-dark mb-1">Paseo de los Héroes #9211</div>
-                    <div class="small text-muted mb-2">Zona Urbana Río (Área Médica), Tijuana, B.C.</div>
-                    <div class="small text-secondary">
-                        <i class="bi bi-clock me-1"></i> Lunes a Viernes: 7:00 AM – 7:00 PM<br>
-                        <i class="bi bi-clock me-1"></i> Urgencias Clínicas: 24 Horas
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- SECCIÓN 5: BLOQUE DE ACCESO AL PANEL ADMINISTRATIVO (Requerimiento explícito) -->
-<section class="mb-4">
-    <div class="block-admin-portal shadow">
-        <div class="row align-items-center g-4">
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-info text-dark font-monospace text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">Personal Clínico Autorizado</span>
-                    <span class="badge bg-secondary font-monospace" style="font-size: 0.7rem;">Módulos Internos</span>
-                </div>
-                <h3 class="admin-title mb-2">
-                    Portal de Control Clínico y Panel Administrativo
-                </h3>
-                <p class="admin-desc mb-3">
-                    Espacio reservado exclusivamente para Químicos Farmacobiólogos, Personal de Recepción y Administración del laboratorio. Permite el alta de pacientes con autocompletado por API, cotización de estudios, registro y etiquetado de muestras biológicas, captura de valores analíticos y cambio de estados.
-                </p>
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <span class="small text-light me-1" style="font-size: 0.8rem;">Cuentas de demostración activas:</span>
-                    <span class="credential-chip">
-                        Admin Químico: <strong>admin</strong> / <strong>admin123</strong>
-                    </span>
-                    <span class="credential-chip">
-                        Recepción: <strong>recepcion</strong> / <strong>recepcion123</strong>
-                    </span>
-                </div>
-            </div>
-            <div class="col-lg-4 text-lg-end text-center">
-                {% if session.get('user_id') %}
-                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 py-3 fw-semibold shadow-sm w-100 w-lg-auto">
-                    <i class="bi bi-speedometer2 me-2"></i> Ir a tu Panel Administrativo
-                </a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="btn btn-light btn-lg px-4 py-3 text-dark fw-bold shadow-sm w-100 w-lg-auto" style="border: 2px solid #38bdf8;">
-                    <i class="bi bi-box-arrow-in-right me-2 text-primary"></i> Ingresar al Panel Administrativo &rarr;
-                </a>
-                <div class="mt-2">
-                    <small class="text-white-50" style="font-size: 0.75rem;">Acceso protegido con sesiones cifradas y control de roles</small>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
