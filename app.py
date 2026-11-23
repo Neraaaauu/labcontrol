@@ -142,8 +142,9 @@ def index():
     orden = None
     estudios_orden = []
 
-    if request.method == 'POST' or request.args.get('codigo'):
-        codigo_buscado = (request.form.get('codigo') or request.args.get('codigo') or '').strip().upper()
+    if request.method == 'POST' or request.args.get('codigo') or request.args.get('folio'):
+        codigo_buscado = (request.form.get('codigo') or request.form.get('folio') or 
+                          request.args.get('codigo') or request.args.get('folio') or '').strip().upper()
         if codigo_buscado:
             orden, estudios_orden = obtener_orden_completa_optimizada(codigo_buscado)
             if not orden:
@@ -276,6 +277,9 @@ def nuevo_paciente():
         if not tel_valido:
             errores.append(msg_tel)
 
+        if sexo and sexo not in ('M', 'F', 'O'):
+            errores.append('El sexo biológico seleccionado no es válido (debe ser Masculino [M], Femenino [F] u Otro [O]).')
+
         if errores:
             for err in errores:
                 flash(err, 'danger')
@@ -379,6 +383,9 @@ def editar_paciente(id):
         tel_valido, msg_tel = validar_telefono_formato(telefono)
         if not tel_valido:
             errores.append(msg_tel)
+
+        if sexo and sexo not in ('M', 'F', 'O'):
+            errores.append('El sexo biológico seleccionado no es válido (debe ser Masculino [M], Femenino [F] u Otro [O]).')
 
         if errores:
             for err in errores:
@@ -745,8 +752,9 @@ def consultar_codigo():
     codigo_buscado = ''
     estudios_resultado = []
 
-    if request.method == 'POST' or request.args.get('codigo'):
-        codigo_buscado = (request.form.get('codigo') or request.args.get('codigo') or '').strip().upper()
+    if request.method == 'POST' or request.args.get('codigo') or request.args.get('folio'):
+        codigo_buscado = (request.form.get('codigo') or request.form.get('folio') or 
+                          request.args.get('codigo') or request.args.get('folio') or '').strip().upper()
 
         if not codigo_buscado:
             flash('Por favor ingresa un folio o código de orden (Ejemplo: ORD-2026-1001).', 'warning')

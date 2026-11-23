@@ -13,6 +13,7 @@ import time
 import cProfile
 import pstats
 import io
+import csv
 from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -144,6 +145,15 @@ def run_benchmark(iterations=150):
     s_despues = io.StringIO()
     ps_despues = pstats.Stats(pr_despues, stream=s_despues).sort_stats('tottime')
     ps_despues.print_stats(8)
+
+    # Exportar datos crudos a CSV para abrir en Excel / Calc / graficar
+    csv_path = os.path.join(SCREENSHOTS_DIR, "datos_rendimiento.csv")
+    with open(csv_path, mode="w", newline="", encoding="utf-8") as f_csv:
+        writer = csv.writer(f_csv)
+        writer.writerow(["Iteracion", "Antes_Sin_Optimizar_ms", "Despues_Optimizado_ms"])
+        for idx, (t_ant, t_des) in enumerate(zip(tiempos_antes, tiempos_despues), start=1):
+            writer.writerow([idx, round(t_ant, 4), round(t_des, 4)])
+    print(f"Datos brutos exportados a CSV: {csv_path}")
 
     # Generar gráfico visual
     render_benchmark_chart(avg_antes, avg_despues, speedup, reduccion_pct, iterations)
