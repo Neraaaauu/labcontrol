@@ -141,3 +141,92 @@ def test_consulta_publica_por_codigo(client):
     assert res.status_code == 200
     assert b"ORD-2026-1001" in res.data
     assert b"Mar" in res.data or b"Garc" in res.data  # María Fernanda García
+
+# ==============================================================================
+# PRUEBAS UNITARIAS AVANCE 3 (INTEGRACIÓN, CALIDAD, API Y REGLAS DE NEGOCIO)
+# ==============================================================================
+
+def test_index_redisenado_portal_paciente(client):
+    """Verifica que la raíz sea el portal público accesible para clientes sin requerir login."""
+    res = client.get('/')
+    assert res.status_code == 200
+    assert b"Consulta y Descarga de Resultados" in res.data or b"Consultar Mis Resultados" in res.data
+    assert b"Portal de Control Cl" in res.data or b"Panel Administrativo" in res.data
+    assert b"ORD-2026-1001" in res.data  # Chips de prueba
+
+def test_index_busqueda_directa_por_folio(client):
+    """Verifica la consulta de resultados interactiva en la nueva página principal."""
+    res = client.post('/', data={'codigo': 'ORD-2026-1001'}, follow_redirects=True)
+    assert res.status_code == 200
+    assert b"ORD-2026-1001" in res.data
+    assert b"Garc" in res.data  # Paciente García López
+    assert b"Resultados Validados" in res.data or b"Completada" in res.data
+
+def test_reporte_clinico_oficial_impreso(client):
+    """Verifica que el informe de resultados clínico oficial se genere con sello y datos de QFB."""
+    res = client.get('/consultar/reporte/ORD-2026-1001')
+    assert res.status_code == 200
+    assert b"LABCONTROL" in res.data
+    assert b"Informe Cl" in res.data
+    assert b"Carlos M" in res.data  # QFB. Carlos Méndez
+    assert b"8472910" in res.data    # Cédula profesional
+    assert b"SELLO" in res.data
+
+def test_api_rest_ordenes_json_y_404(client):
+    """Verifica el endpoint REST /api/v1/ordenes/<codigo> tanto para folios válidos como 404."""
+    # Caso 1: Folio existente
+    res = client.get('/api/v1/ordenes/ORD-2026-1001')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['status'] == 'success'
+    assert data['data']['folio'] == 'ORD-2026-1001'
+    assert 'paciente' in data['data']
+    assert 'estudios' in data['data']
+    assert len(data['data']['estudios']) > 0
+
+    # Caso 2: Folio inexistente debe responder HTTP 404 estructurado
+    res_404 = client.get('/api/v1/ordenes/ORD-9999-9999')
+    assert res_404.status_code == 404
+    data_404 = res_404.get_json()
+    assert data_404['status'] == 'error'
+    assert data_404['codigo_http'] == 404
+
+def test_api_rest_catalogo_estudios_json(client):
+    """Verifica el endpoint REST /api/v1/estudios para consultar el catálogo disponible."""
+    res = client.get('/api/v1/estudios')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['status'] == 'success'
+    assert 'estudios' in data
+    assert len(data['estudios']) >= 4
+    primer_estudio = data['estudios'][0]
+    assert 'codigo' in primer_estudio
+    assert 'precio' in primer_estudio
+
+def test_api_rest_validacion_curp_tiempo_real(client):
+    """Verifica el endpoint REST /api/v1/pacientes/validar-curp."""
+    # Caso 1: CURP con formato inválido -> 400 Bad Request
+    res_inv = client.post('/api/v1/pacientes/validar-curp', json={'curp': 'CURP_INVALIDA_123'})
+    assert res_inv.status_code == 400
+    assert res_inv.get_json()['valido'] is False
+
+    # Caso 2: CURP válida y duplicada (María Fernanda García)
+    res_dup = client.post('/api/v1/pacientes/validar-curp', json={'curp': 'GALM880415HBCRLA01'})
+    assert res_dup.status_code == 200
+    assert res_dup.get_json()['disponible'] is False
+    assert b"ya est" in res_dup.data or "ya está" in res_dup.get_json()['mensaje']
+
+    # Caso 3: CURP válida y nueva disponible
+    res_ok = client.post('/api/v1/pacientes/validar-curp', json={'curp': 'DELG641009HDFRRL01'})
+    assert res_ok.status_code == 200
+    assert res_ok.get_json()['disponible'] is True
+    assert 'metadatos' in res_ok.get_json()
+
+def test_maquina_estados_rechazo_transicion_invalida(client):
+    """Verifica que la máquina de estados impida completar una orden sin haber recibido muestra biológica."""
+    client.post('/login', data={'username': 'admin', 'password': 'admin123'})
+
+    # Orden 4 está en estado 'Pendiente' (sin muestra recibida). Intentar saltar a 'Completada' debe ser rechazado
+    res = client.post('/ordenes/4/estado', data={'nuevo_estado': 'Completada'}, follow_redirects=True)
+    assert res.status_code == 200
+    assert b"No se puede completar una orden sin antes haber recibido la muestra" in res.data

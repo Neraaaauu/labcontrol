@@ -17,7 +17,7 @@
     <!-- Navegación Superior -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-clinical sticky-top">
         <div class="container-fluid px-lg-4">
-            <a class="navbar-brand" href="{{ url_for('dashboard') if session.get('user_id') else url_for('consultar_codigo') }}">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
                 <span class="brand-dot"></span>
                 <span>LabControl</span>
             </a>
@@ -31,7 +31,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-lg-1">
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-                            Panel
+                            Panel Control
                         </a>
                     </li>
                     <li class="nav-item">
@@ -50,8 +50,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'consultar_codigo' %}active{% endif %}" href="{{ url_for('consultar_codigo') }}">
-                            Buscar Folio
+                        <a class="nav-link {% if request.endpoint in ['consultar_codigo', 'index'] and not request.args.get('dashboard') %}active{% endif %}" href="{{ url_for('index') }}#consulta">
+                            Consultar Folio
                         </a>
                     </li>
                 </ul>
@@ -70,13 +70,28 @@
                 {% else %}
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-2">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'consultar_codigo' %}active{% endif %}" href="{{ url_for('consultar_codigo') }}">
-                            Consultar Folio
+                        <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+                            Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}#consulta">
+                            Consultar Resultados
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}#servicios">
+                            Servicios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}#sucursales">
+                            Sucursales
                         </a>
                     </li>
                     <li class="nav-item ms-lg-2">
-                        <a class="btn btn-sm btn-subtle" href="{{ url_for('login') }}">
-                            Iniciar Sesión
+                        <a class="btn btn-sm btn-subtle text-dark bg-white" href="{{ url_for('login') }}">
+                            <i class="bi bi-person-badge me-1"></i> Acceso Personal
                         </a>
                     </li>
                 </ul>

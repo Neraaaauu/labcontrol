@@ -455,3 +455,135 @@ body {
     border: 1px solid #d1d5db !important;
   }
 }
+
+/* ==========================================================================
+   Landing Page / Portal del Paciente (Avance 3 - Rediseño del Index)
+   ========================================================================== */
+.hero-clinical {
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 1.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-clinical::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #2b4c6f 0%, #38bdf8 50%, #0284c7 100%);
+}
+
+.hero-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--c-text-title);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--c-text-secondary);
+  line-height: 1.6;
+}
+
+.trust-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #ffffff;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-text-secondary);
+}
+
+.trust-badge-pill i {
+  color: #0284c7;
+}
+
+.card-service-clinical {
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  height: 100%;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-service-clinical:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.service-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background-color: #eff6ff;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.85rem;
+}
+
+.block-admin-portal {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-radius: var(--radius-lg);
+  border: 1px solid #1e293b;
+  padding: 2.25rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.block-admin-portal::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.block-admin-portal .admin-title {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.block-admin-portal .admin-desc {
+  color: #94a3b8;
+  font-size: 0.925rem;
+  line-height: 1.6;
+}
+
+.credential-chip {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: 0.4rem 0.75rem;
+  font-family: monospace;
+  font-size: 0.825rem;
+  color: #cbd5e1;
+  display: inline-block;
+}
+
+.credential-chip strong {
+  color: #38bdf8;
+}

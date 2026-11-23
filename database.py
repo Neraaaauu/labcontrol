@@ -313,8 +313,90 @@ def init_db():
         );
         """)
 
+    # Índices de optimización para MariaDB y SQLite (Avance 3 - Medición y Rendimiento)
+    indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_ordenes_codigo ON ordenes(codigo_orden)",
+        "CREATE INDEX IF NOT EXISTS idx_ordenes_paciente ON ordenes(paciente_id)",
+        "CREATE INDEX IF NOT EXISTS idx_ordenes_estado ON ordenes(estado_orden)",
+        "CREATE INDEX IF NOT EXISTS idx_orden_estudios_orden ON orden_estudios(orden_id)",
+        "CREATE INDEX IF NOT EXISTS idx_pacientes_curp ON pacientes(curp)"
+    ]
+    for idx_sql in indexes:
+        try:
+            cursor.execute(idx_sql)
+        except Exception:
+            pass
+
     conn.commit()
     conn.close()
+
+def obtener_orden_completa_optimizada(codigo_orden):
+    """Consulta optimizada en una sola ronda relacional con JOIN e índices."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT o.id AS orden_id, o.codigo_orden, o.estado_orden, o.total, o.metodo_pago,
+               o.notas_clinicas, o.fecha_toma_muestra, o.fecha_recepcion_muestra, o.fecha_completada, o.creado_en,
+               p.id AS paciente_id, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido,
+               p.curp AS paciente_curp, p.fecha_nacimiento AS paciente_nacimiento, p.sexo AS paciente_sexo,
+               p.telefono AS paciente_telefono, p.email AS paciente_email,
+               u.nombre_completo AS atendido_por,
+               oe.id AS oe_id, oe.precio_unitario, oe.estado_estudio, oe.resultado_texto, oe.valores_referencia,
+               e.id AS estudio_id, e.codigo AS estudio_codigo, e.nombre AS estudio_nombre,
+               e.tipo_muestra, e.indicaciones, e.categoria
+        FROM ordenes o
+        JOIN pacientes p ON o.paciente_id = p.id
+        JOIN usuarios u ON o.usuario_id = u.id
+        LEFT JOIN orden_estudios oe ON oe.orden_id = o.id
+        LEFT JOIN estudios e ON oe.estudio_id = e.id
+        WHERE o.codigo_orden = ?
+    """, (codigo_orden.strip().upper(),))
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return None, []
+
+    first = rows[0]
+    orden = {
+        'id': first['orden_id'],
+        'codigo_orden': first['codigo_orden'],
+        'estado_orden': first['estado_orden'],
+        'total': first['total'],
+        'metodo_pago': first['metodo_pago'],
+        'notas_clinicas': first['notas_clinicas'],
+        'fecha_toma_muestra': first['fecha_toma_muestra'],
+        'fecha_recepcion_muestra': first['fecha_recepcion_muestra'],
+        'fecha_completada': first['fecha_completada'],
+        'creado_en': first['creado_en'],
+        'paciente_id': first['paciente_id'],
+        'paciente_nombre': f"{first['paciente_nombre']} {first['paciente_apellido']}".strip(),
+        'paciente_curp': first['paciente_curp'],
+        'paciente_nacimiento': first['paciente_nacimiento'],
+        'paciente_sexo': first['paciente_sexo'],
+        'paciente_telefono': first['paciente_telefono'],
+        'paciente_email': first['paciente_email'],
+        'atendido_por': first['atendido_por']
+    }
+
+    estudios = []
+    for r in rows:
+        if r['estudio_id'] is not None:
+            estudios.append({
+                'id': r['oe_id'],
+                'estudio_id': r['estudio_id'],
+                'codigo': r['estudio_codigo'],
+                'nombre': r['estudio_nombre'],
+                'categoria': r['categoria'],
+                'tipo_muestra': r['tipo_muestra'],
+                'indicaciones': r['indicaciones'],
+                'precio_unitario': r['precio_unitario'],
+                'estado_estudio': r['estado_estudio'],
+                'resultado_texto': r['resultado_texto'],
+                'valores_referencia': r['valores_referencia']
+            })
+
+    return orden, estudios
 
 if __name__ == '__main__':
     init_db()

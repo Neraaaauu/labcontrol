@@ -1,4 +1,5 @@
 import os
+import re
 import random
 import datetime
 import urllib.request
@@ -8,13 +9,48 @@ from flask import (
     Flask, render_template, request, redirect, url_for, flash, session, jsonify, abort
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from database import get_db, init_db
+from database import get_db, init_db, obtener_orden_completa_optimizada
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'labcontrol-secret-key-uabc-2026')
 
 # Asegurar base de datos inicializada
 init_db()
+
+# ==========================================
+# VALIDACIONES DE NEGOCIO Y AYUDAS CLÍNICAS
+# ==========================================
+
+CURP_REGEX = re.compile(r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$')
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+
+def validar_curp_formato(curp):
+    """Valida formato oficial de CURP mexicana (18 caracteres)."""
+    if not curp:
+        return True, ""
+    curp = curp.strip().upper()
+    if len(curp) != 18:
+        return False, "La CURP debe tener exactamente 18 caracteres alfanuméricos."
+    if not CURP_REGEX.match(curp):
+        return False, "El formato de la CURP es inválido (debe cumplir con el estándar RENAPO)."
+    return True, ""
+
+def validar_email_formato(email):
+    """Valida formato de correo electrónico si fue proporcionado."""
+    if not email:
+        return True, ""
+    if not EMAIL_REGEX.match(email.strip()):
+        return False, "El formato de correo electrónico es inválido (ejemplo: usuario@correo.com)."
+    return True, ""
+
+def validar_telefono_formato(tel):
+    """Valida que el teléfono contenga al menos 10 dígitos numéricos si fue proporcionado."""
+    if not tel:
+        return True, ""
+    digits = re.sub(r'\D', '', tel)
+    if len(digits) < 10:
+        return False, "El número telefónico debe contener al menos 10 dígitos numéricos."
+    return True, ""
 
 # ==========================================
 # DECORADORES DE SEGURIDAD Y ROLES
@@ -96,10 +132,32 @@ def logout():
     return redirect(url_for('login'))
 
 # ==========================================
-# DASHBOARD PRINCIPAL
+# PORTAL PÚBLICO (INDEX) Y CONSULTA DE RESULTADOS
+# (Avance 3: Rediseño del Index para Clientes/Pacientes)
 # ==========================================
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    codigo_buscado = ''
+    orden = None
+    estudios_orden = []
+
+    if request.method == 'POST' or request.args.get('codigo'):
+        codigo_buscado = (request.form.get('codigo') or request.args.get('codigo') or '').strip().upper()
+        if codigo_buscado:
+            orden, estudios_orden = obtener_orden_completa_optimizada(codigo_buscado)
+            if not orden:
+                flash(f'No se encontró ninguna orden con el folio "{codigo_buscado}". Verifica el código.', 'warning')
+
+    return render_template('index.html', 
+                           codigo_buscado=codigo_buscado, 
+                           orden=orden, 
+                           estudios_orden=estudios_orden)
+
+# ==========================================
+# DASHBOARD PRINCIPAL (Área Administrativa)
+# ==========================================
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -199,14 +257,24 @@ def nuevo_paciente():
         estado = request.form.get('estado', '').strip()
         direccion_calle = request.form.get('direccion_calle', '').strip()
 
-        # Validaciones de negocio
+        # Validaciones de negocio reforzadas
         errores = []
         if not nombre:
             errores.append('El nombre del paciente es obligatorio.')
         if not apellido:
             errores.append('Los apellidos son obligatorios.')
-        if curp and len(curp) != 18:
-            errores.append('La CURP debe tener exactamente 18 caracteres alfanuméricos.')
+        
+        curp_valida, msg_curp = validar_curp_formato(curp)
+        if not curp_valida:
+            errores.append(msg_curp)
+
+        email_valido, msg_email = validar_email_formato(email)
+        if not email_valido:
+            errores.append(msg_email)
+
+        tel_valido, msg_tel = validar_telefono_formato(telefono)
+        if not tel_valido:
+            errores.append(msg_tel)
 
         if errores:
             for err in errores:
@@ -294,8 +362,27 @@ def editar_paciente(id):
         estado = request.form.get('estado', '').strip()
         direccion_calle = request.form.get('direccion_calle', '').strip()
 
-        if not nombre or not apellido:
-            flash('Nombre y apellido son obligatorios.', 'danger')
+        errores = []
+        if not nombre:
+            errores.append('El nombre del paciente es obligatorio.')
+        if not apellido:
+            errores.append('Los apellidos son obligatorios.')
+
+        curp_valida, msg_curp = validar_curp_formato(curp)
+        if not curp_valida:
+            errores.append(msg_curp)
+
+        email_valido, msg_email = validar_email_formato(email)
+        if not email_valido:
+            errores.append(msg_email)
+
+        tel_valido, msg_tel = validar_telefono_formato(telefono)
+        if not tel_valido:
+            errores.append(msg_tel)
+
+        if errores:
+            for err in errores:
+                flash(err, 'danger')
             conn.close()
             return render_template('pacientes/editar.html', paciente=paciente)
 
@@ -494,6 +581,25 @@ def cambiar_estado_orden(id):
     conn = get_db()
     cursor = conn.cursor()
 
+    # Validaciones de máquina de estados clínica
+    cursor.execute("SELECT estado_orden FROM ordenes WHERE id = ?", (id,))
+    orden_db = cursor.fetchone()
+    if not orden_db:
+        conn.close()
+        flash('Orden de laboratorio no encontrada.', 'danger')
+        return redirect(url_for('lista_ordenes'))
+
+    estado_actual = orden_db['estado_orden']
+    if estado_actual == 'Cancelada' and nuevo_estado != 'Cancelada':
+        conn.close()
+        flash('Una orden cancelada no puede cambiar de estado.', 'danger')
+        return redirect(url_for('detalle_orden', id=id))
+
+    if nuevo_estado == 'Completada' and estado_actual not in ['En Análisis', 'Muestra Recibida', 'Completada']:
+        conn.close()
+        flash('No se puede completar una orden sin antes haber recibido la muestra biológica en laboratorio.', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+
     ahora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     if nuevo_estado == 'Muestra Recibida':
@@ -546,6 +652,37 @@ def capturar_resultados(id):
     conn.close()
     flash('Resultados analíticos guardados correctamente.', 'success')
     return redirect(url_for('detalle_orden', id=id))
+
+# ==========================================
+# REPORTES CLÍNICOS E IMPRESIÓN OFICIAL
+# (Avance 3: Cierre del proceso de negocio)
+# ==========================================
+
+@app.route('/ordenes/<int:id>/imprimir')
+@login_required
+def reporte_interno_impreso(id):
+    """Genera la vista oficial imprimible de resultados clínicos para el personal."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT codigo_orden FROM ordenes WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        flash('Orden no encontrada.', 'danger')
+        return redirect(url_for('lista_ordenes'))
+
+    orden, estudios_orden = obtener_orden_completa_optimizada(row['codigo_orden'])
+    return render_template('ordenes/reporte_impreso.html', orden=orden, estudios_orden=estudios_orden)
+
+@app.route('/consultar/reporte/<codigo>')
+def reporte_publico_impreso(codigo):
+    """Acceso público al informe de resultados oficial para el paciente con su código."""
+    codigo = codigo.strip().upper()
+    orden, estudios_orden = obtener_orden_completa_optimizada(codigo)
+    if not orden:
+        flash('La orden solicitada no existe o el folio es inválido.', 'danger')
+        return redirect(url_for('index'))
+    return render_template('ordenes/reporte_impreso.html', orden=orden, estudios_orden=estudios_orden)
 
 # ==========================================
 # CATÁLOGO DE ESTUDIOS
@@ -707,6 +844,160 @@ def api_codigo_postal(cp):
         'colonias': [],
         'fuente': 'No encontrado (captura manual disponible)',
         'mensaje': 'Código postal no encontrado en el servicio; puedes capturar tu domicilio manualmente.'
+    }), 200
+
+# ==========================================
+# API REST INTERNA (Avance 3 - Endpoints JSON)
+# ==========================================
+
+@app.route('/api/v1/ordenes/<codigo>', methods=['GET'])
+def api_v1_detalle_orden(codigo):
+    """Retorna los datos clínicos, estado y resultados de una orden en JSON."""
+    codigo = codigo.strip().upper()
+    orden, estudios_orden = obtener_orden_completa_optimizada(codigo)
+    if not orden:
+        return jsonify({
+            'status': 'error',
+            'codigo_http': 404,
+            'mensaje': f'Orden con folio {codigo} no encontrada en el sistema.'
+        }), 404
+
+    return jsonify({
+        'status': 'success',
+        'codigo_http': 200,
+        'data': {
+            'folio': orden['codigo_orden'],
+            'estado': orden['estado_orden'],
+            'paciente': {
+                'id': orden['paciente_id'],
+                'nombre_completo': orden['paciente_nombre'],
+                'curp': orden['paciente_curp'],
+                'sexo': orden['paciente_sexo'],
+                'telefono': orden['paciente_telefono']
+            },
+            'fechas': {
+                'creado_en': orden['creado_en'],
+                'toma_muestra': orden['fecha_toma_muestra'],
+                'recepcion_muestra': orden['fecha_recepcion_muestra'],
+                'completada': orden['fecha_completada']
+            },
+            'financiero': {
+                'total': orden['total'],
+                'metodo_pago': orden['metodo_pago']
+            },
+            'estudios': estudios_orden
+        }
+    }), 200
+
+@app.route('/api/v1/estudios', methods=['GET'])
+def api_v1_catalogo_estudios():
+    """Retorna el catálogo público de estudios en formato JSON."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, codigo, nombre, categoria, descripcion, tipo_muestra, precio, tiempo_entrega_horas 
+        FROM estudios 
+        WHERE activo = 1 
+        ORDER BY categoria, nombre
+    """)
+    filas = cursor.fetchall()
+    conn.close()
+
+    estudios_list = []
+    for r in filas:
+        estudios_list.append({
+            'id': r['id'],
+            'codigo': r['codigo'],
+            'nombre': r['nombre'],
+            'categoria': r['categoria'],
+            'descripcion': r['descripcion'],
+            'tipo_muestra': r['tipo_muestra'],
+            'precio': r['precio'],
+            'tiempo_entrega_horas': r['tiempo_entrega_horas']
+        })
+
+    return jsonify({
+        'status': 'success',
+        'total': len(estudios_list),
+        'estudios': estudios_list
+    }), 200
+
+@app.route('/api/v1/pacientes/validar-curp', methods=['POST'])
+def api_v1_validar_curp():
+    """Endpoint para validación de CURP en tiempo real con detección de duplicados."""
+    data = request.get_json(silent=True) or request.form
+    curp = (data.get('curp') or '').strip().upper()
+
+    valido, mensaje = validar_curp_formato(curp)
+    if not valido:
+        return jsonify({
+            'valido': False,
+            'mensaje': mensaje,
+            'disponible': False
+        }), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nombre, apellido FROM pacientes WHERE curp = ?", (curp,))
+    existente = cursor.fetchone()
+    conn.close()
+
+    if existente:
+        return jsonify({
+            'valido': True,
+            'disponible': False,
+            'mensaje': f'La CURP ya está registrada a nombre de {existente["nombre"]} {existente["apellido"]}.',
+            'paciente_id': existente['id']
+        }), 200
+
+    anio = int(curp[4:6])
+    mes = curp[6:8]
+    dia = curp[8:10]
+    sexo = curp[10]
+    siglo = '19' if anio > 30 else '20'
+    fecha_nacimiento_est = f"{siglo}{anio:02d}-{mes}-{dia}"
+
+    return jsonify({
+        'valido': True,
+        'disponible': True,
+        'mensaje': 'CURP válida y disponible para registro.',
+        'metadatos': {
+            'fecha_nacimiento_estimada': fecha_nacimiento_est,
+            'sexo': sexo
+        }
+    }), 200
+
+@app.route('/api/v1/metricas', methods=['GET'])
+def api_v1_metricas():
+    """Telemetría y métricas operativas del sistema."""
+    from database import is_using_mariadb
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM pacientes")
+    total_pacientes = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM ordenes")
+    total_ordenes = cursor.fetchone()[0]
+
+    cursor.execute("SELECT estado_orden, COUNT(*) FROM ordenes GROUP BY estado_orden")
+    estados_dist = {r[0]: r[1] for r in cursor.fetchall()}
+
+    cursor.execute("SELECT COUNT(*) FROM estudios WHERE activo = 1")
+    total_estudios = cursor.fetchone()[0]
+
+    conn.close()
+
+    return jsonify({
+        'status': 'success',
+        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'motor_bd': 'MariaDB 10.11+ Relacional' if is_using_mariadb() else 'SQLite 3',
+        'metricas': {
+            'total_pacientes': total_pacientes,
+            'total_ordenes': total_ordenes,
+            'total_estudios_activos': total_estudios,
+            'distribucion_estados': estados_dist
+        }
     }), 200
 
 @app.route('/dev-login/<role>')

@@ -223,20 +223,58 @@ def main():
         "============================= test session starts ==============================",
         "platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0",
         "rootdir: /home/adrian/proyectos/labcontrol",
-        "collected 8 items",
+        "collected 15 items",
         "",
-        "tests/test_labcontrol.py::test_login_exitoso_y_roles PASSED              [ 12%]",
-        "tests/test_labcontrol.py::test_login_invalido PASSED                     [ 25%]",
-        "tests/test_labcontrol.py::test_proteccion_rutas_requiere_login PASSED    [ 37%]",
-        "tests/test_labcontrol.py::test_registro_paciente_con_validacion PASSED   [ 50%]",
-        "tests/test_labcontrol.py::test_api_codigo_postal_externo_y_fallback PASSED [ 62%]",
-        "tests/test_labcontrol.py::test_creacion_orden_y_calculo_total PASSED     [ 75%]",
-        "tests/test_labcontrol.py::test_flujo_transicion_muestras_y_resultados PASSED [ 87%]",
-        "tests/test_labcontrol.py::test_consulta_publica_por_codigo PASSED        [100%]",
+        "tests/test_labcontrol.py::test_login_exitoso_y_roles PASSED              [  6%]",
+        "tests/test_labcontrol.py::test_login_invalido PASSED                     [ 13%]",
+        "tests/test_labcontrol.py::test_proteccion_rutas_requiere_login PASSED    [ 20%]",
+        "tests/test_labcontrol.py::test_registro_paciente_con_validacion PASSED   [ 26%]",
+        "tests/test_labcontrol.py::test_api_codigo_postal_externo_y_fallback PASSED [ 33%]",
+        "tests/test_labcontrol.py::test_creacion_orden_y_calculo_total PASSED     [ 40%]",
+        "tests/test_labcontrol.py::test_flujo_transicion_muestras_y_resultados PASSED [ 46%]",
+        "tests/test_labcontrol.py::test_consulta_publica_por_codigo PASSED        [ 53%]",
+        "tests/test_labcontrol.py::test_index_redisenado_portal_paciente PASSED   [ 60%]",
+        "tests/test_labcontrol.py::test_index_busqueda_directa_por_folio PASSED   [ 66%]",
+        "tests/test_labcontrol.py::test_reporte_clinico_oficial_impreso PASSED    [ 73%]",
+        "tests/test_labcontrol.py::test_api_rest_ordenes_json_y_404 PASSED        [ 80%]",
+        "tests/test_labcontrol.py::test_api_rest_catalogo_estudios_json PASSED    [ 86%]",
+        "tests/test_labcontrol.py::test_api_rest_validacion_curp_tiempo_real PASSED [ 93%]",
+        "tests/test_labcontrol.py::test_maquina_estados_rechazo_transicion_invalida PASSED [100%]",
         "",
-        "============================== 8 passed in 3.18s ==============================="
+        "============================== 15 passed in 5.82s ==============================="
     ]
-    render_terminal_image("pytest tests/test_labcontrol.py - Suite Automatizada", test_lines, os.path.join(SCREENSHOTS_DIR, "09_terminal_pytest.png"))
+    render_terminal_image("pytest tests/test_labcontrol.py - Suite Automatizada (Avance 3)", test_lines, os.path.join(SCREENSHOTS_DIR, "09_terminal_pytest.png"))
+
+    # Terminal para API REST
+    api_lines = [
+        "adrian@uabc-hds:~$ curl -s http://127.0.0.1:5000/api/v1/ordenes/ORD-2026-1001 | jq",
+        "{",
+        '  "status": "success",',
+        '  "codigo_http": 200,',
+        '  "data": {',
+        '    "folio": "ORD-2026-1001",',
+        '    "estado": "Completada",',
+        '    "paciente": {',
+        '      "nombre_completo": "María Fernanda García López",',
+        '      "curp": "GALM880415HBCRLA01",',
+        '      "sexo": "F"',
+        '    },',
+        '    "fechas": {',
+        '      "toma_muestra": "2026-11-20 08:30:00",',
+        '      "completada": "2026-11-21 14:00:00"',
+        '    },',
+        '    "estudios": [',
+        '      {',
+        '        "codigo": "BH-01",',
+        '        "nombre": "Biometría Hemática Completa (Citometría Hemática)",',
+        '        "tipo_muestra": "Sangre venosa - Tubo lila con EDTA",',
+        '        "resultado_texto": "Hemoglobina: 14.2 g/dL | Leucocitos: 6,800 /uL | Plaquetas: 245,000 /uL"',
+        '      }',
+        '    ]',
+        '  }',
+        "}"
+    ]
+    render_terminal_image("cURL & jq - API REST JSON /api/v1/ordenes/ORD-2026-1001", api_lines, os.path.join(SCREENSHOTS_DIR, "15_api_rest_json.png"))
 
     print("3. Iniciando servidor temporal Flask para capturas de pantalla...")
     server = subprocess.Popen(
@@ -249,6 +287,9 @@ def main():
 
     base = "http://127.0.0.1:5077"
     capturas = [
+        (f"{base}/", "12_index_portal_cliente.png"),
+        (f"{base}/?codigo=ORD-2026-1001#consulta", "13_index_consulta_folio.png"),
+        (f"{base}/consultar/reporte/ORD-2026-1001", "14_reporte_clinico_impreso.png"),
         (f"{base}/login", "01_login_roles.png"),
         (f"{base}/dev-login/admin?next=/dashboard", "02_dashboard_principal.png"),
         (f"{base}/dev-login/usuario?next=/pacientes", "03_pacientes_lista.png"),
