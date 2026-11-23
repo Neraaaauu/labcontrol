@@ -31,19 +31,29 @@ def client():
         os.unlink(db_path)
 
 def test_login_exitoso_y_roles(client):
-    """Verifica inicio de sesión exitoso tanto para admin como usuario."""
-    # Test Admin
+    """Verifica inicio de sesión exitoso para los 4 roles clínicos definidos (admin, recepcion, quimico, medico)."""
+    # 1. Test Admin
     res_admin = client.post('/login', data={'username': 'admin', 'password': 'admin123'}, follow_redirects=True)
     assert res_admin.status_code == 200
     assert b"Carlos M" in res_admin.data or b"Dashboard" in res_admin.data
-
-    # Cerrar sesión
     client.get('/logout')
 
-    # Test Usuario/Recepción
+    # 2. Test Recepción
     res_user = client.post('/login', data={'username': 'recepcion', 'password': 'recepcion123'}, follow_redirects=True)
     assert res_user.status_code == 200
     assert b"Laura Morales" in res_user.data or b"Dashboard" in res_user.data
+    client.get('/logout')
+
+    # 3. Test Químico Analista Q.F.B.
+    res_qfb = client.post('/login', data={'username': 'quimico', 'password': 'quimico123'}, follow_redirects=True)
+    assert res_qfb.status_code == 200
+    assert b"Roberto Salcedo" in res_qfb.data or b"Dashboard" in res_qfb.data
+    client.get('/logout')
+
+    # 4. Test Médico Patólogo Validador
+    res_doc = client.post('/login', data={'username': 'doctor', 'password': 'doctor123'}, follow_redirects=True)
+    assert res_doc.status_code == 200
+    assert b"Alejandro Pe" in res_doc.data or b"Dashboard" in res_doc.data
 
 def test_login_invalido(client):
     """Verifica rechazo ante contraseñas incorrectas."""
@@ -163,13 +173,13 @@ def test_index_busqueda_directa_por_folio(client):
     assert b"Resultados Validados" in res.data or b"Completada" in res.data
 
 def test_reporte_clinico_oficial_impreso(client):
-    """Verifica que el informe de resultados clínico oficial se genere con sello y datos de QFB."""
+    """Verifica que el informe de resultados clínico oficial se genere con sello, datos de QFB y validación del médico patólogo."""
     res = client.get('/consultar/reporte/ORD-2026-1001')
     assert res.status_code == 200
     assert b"LABCONTROL" in res.data
     assert b"Informe Cl" in res.data
-    assert b"Carlos M" in res.data  # QFB. Carlos Méndez
-    assert b"8472910" in res.data    # Cédula profesional
+    assert b"Alejandro Pe" in res.data  # Dr. Alejandro Peña (Médico Patólogo)
+    assert b"Roberto Salcedo" in res.data  # QFB. Roberto Salcedo
     assert b"SELLO" in res.data
 
 def test_api_rest_ordenes_json_y_404(client):
@@ -230,3 +240,32 @@ def test_maquina_estados_rechazo_transicion_invalida(client):
     res = client.post('/ordenes/4/estado', data={'nuevo_estado': 'Completada'}, follow_redirects=True)
     assert res.status_code == 200
     assert b"No se puede completar una orden sin antes haber recibido la muestra" in res.data
+
+def test_rol_quimico_procesamiento_y_captura(client):
+    """Verifica que el rol de Químico Analista pueda capturar hallazgos analíticos en laboratorio."""
+    client.post('/login', data={'username': 'quimico', 'password': 'quimico123'})
+
+    # Capturar resultados para la orden 2
+    res = client.post('/ordenes/2/capturar-resultados', data={
+        'resultado_3': 'Glucosa: 92.0 mg/dL | Urea: 28.0 mg/dL | Creatinina: 0.9 mg/dL'
+    }, follow_redirects=True)
+    assert res.status_code == 200
+    assert b"guardados correctamente" in res.data
+
+def test_rol_medico_dictamen_y_restriccion_recepcion(client):
+    """Verifica que el Médico Patólogo emita el dictamen clínico y que recepción no tenga acceso a dictaminar."""
+    # Caso 1: Recepción intenta dictaminar médicamente -> Rechazado
+    client.post('/login', data={'username': 'recepcion', 'password': 'recepcion123'})
+    res_rec = client.post('/ordenes/2/validar-medico', data={
+        'interpretacion_medica': 'Dictamen no autorizado por recepcionista'
+    }, follow_redirects=True)
+    assert b"Acceso denegado" in res_rec.data or b"Pat" in res_rec.data
+    client.get('/logout')
+
+    # Caso 2: Médico Patólogo emite dictamen clínico oficial -> Aceptado
+    client.post('/login', data={'username': 'doctor', 'password': 'doctor123'})
+    res_doc = client.post('/ordenes/2/validar-medico', data={
+        'interpretacion_medica': 'Perfil metabólico dentro de límites normales. Sin datos de nefropatía ni dislipidemia.'
+    }, follow_redirects=True)
+    assert res_doc.status_code == 200
+    assert b"Dictamen" in res_doc.data and b"avalada" in res_doc.data

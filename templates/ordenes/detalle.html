@@ -157,11 +157,49 @@
             </div>
 
             {% if orden.notas_clinicas %}
-            <div class="p-2 bg-light rounded border small">
-                <span class="text-muted d-block" style="font-size: 0.75rem;">Notas Clínicas:</span>
+            <div class="p-2 bg-light rounded border small mb-3">
+                <span class="text-muted d-block" style="font-size: 0.75rem;">Notas de Admisión:</span>
                 <span class="text-dark">{{ orden.notas_clinicas }}</span>
             </div>
             {% endif %}
+
+            <!-- Trazabilidad de Personal Clínico (Roles NOM-007) -->
+            <div class="mt-3 pt-3 border-top">
+                <div class="small text-secondary fw-semibold text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.04em;">
+                    Personal Asignado
+                </div>
+
+                <div class="mb-2 p-2 bg-light rounded border">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <i class="bi bi-person-badge text-success small"></i>
+                        <span class="text-muted small fw-semibold" style="font-size: 0.75rem;">Recepción / Ventanilla</span>
+                    </div>
+                    <span class="d-block fw-medium text-dark small">{{ orden.atendido_por }}</span>
+                    <span class="text-muted" style="font-size: 0.7rem;">Turno: {{ orden.recepcion_turno or 'Matutino (Ventanilla 1)' }}</span>
+                </div>
+
+                <div class="mb-2 p-2 bg-light rounded border">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <i class="bi bi-droplet-half text-primary small"></i>
+                        <span class="text-muted small fw-semibold" style="font-size: 0.75rem;">Químico Analista (Q.F.B.)</span>
+                    </div>
+                    <span class="d-block fw-medium text-dark small">{{ orden.quimico_nombre or 'En espera de procesamiento' }}</span>
+                    {% if orden.quimico_cedula %}
+                    <span class="text-muted font-monospace" style="font-size: 0.7rem;">Cédula: {{ orden.quimico_cedula }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="p-2 bg-light rounded border">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <i class="bi bi-heart-pulse text-danger small"></i>
+                        <span class="text-muted small fw-semibold" style="font-size: 0.75rem;">Médico Patólogo / Validador</span>
+                    </div>
+                    <span class="d-block fw-medium text-dark small">{{ orden.medico_nombre or 'Pendiente de dictamen médico' }}</span>
+                    {% if orden.medico_cedula %}
+                    <span class="text-muted font-monospace d-block" style="font-size: 0.7rem;">{{ orden.medico_cedula }}</span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -221,10 +259,63 @@
                             Los resultados guardados se reflejan inmediatamente en la consulta del paciente.
                         </span>
                         <button type="submit" class="btn btn-sm btn-steel">
-                            Guardar Parámetros
+                            Guardar Parámetros (Laboratorio)
                         </button>
                     </div>
                 </form>
+
+                <!-- Validación Médica y Dictamen del Patólogo (Rol de Doctor) -->
+                <div class="mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-patch-check-fill me-1"></i> Módulo Médico
+                            </span>
+                            <span class="fw-semibold text-dark small">Dictamen Diagnóstico e Interpretación Médica</span>
+                        </div>
+                        {% if orden.medico_nombre %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <i class="bi bi-shield-check me-1"></i> Avalado por {{ orden.medico_nombre }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            Pendiente de Dictamen
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if session.get('rol') in ['medico', 'admin'] %}
+                    <form method="POST" action="{{ url_for('validar_medico', id=orden.id) }}" class="mt-2">
+                        <div class="mb-2">
+                            <label for="interpretacion_medica" class="form-label small text-muted">
+                                Conclusiones diagnósticas emitidas por el Médico Patólogo:
+                            </label>
+                            <textarea class="form-control form-control-sm" id="interpretacion_medica" name="interpretacion_medica" rows="3" placeholder="Ej. Serie eritrocitaria normocítica normocrómica. Glucemia basal normal. Sin evidencia de anomalías patológicas agudas..." required>{{ orden.interpretacion_medica or '' }}</textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted" style="font-size: 0.72rem;">
+                                Al firmar médicamente, la orden se validará con tu Cédula Profesional en el reporte oficial.
+                            </span>
+                            <button type="submit" class="btn btn-sm btn-danger px-3">
+                                <i class="bi bi-pen me-1"></i> Firmar y Avalar Médicamente
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                        {% if orden.interpretacion_medica %}
+                        <div class="p-3 bg-light rounded border border-success-subtle mt-2">
+                            <p class="mb-1 text-dark small fw-medium">"{{ orden.interpretacion_medica }}"</p>
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">
+                                &mdash; {{ orden.medico_nombre }} &bull; {{ orden.medico_cedula }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="p-2 bg-light rounded border text-muted small mt-2">
+                            <i class="bi bi-info-circle me-1"></i> Los analitos están registrados. En espera de revisión y dictamen por el <strong>Médico Patólogo</strong>.
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

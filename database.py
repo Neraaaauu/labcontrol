@@ -161,6 +161,9 @@ def init_db():
             password_hash VARCHAR(255) NOT NULL,
             nombre_completo VARCHAR(255) NOT NULL,
             rol VARCHAR(50) NOT NULL,
+            cedula_profesional VARCHAR(100) DEFAULT '',
+            especialidad VARCHAR(150) DEFAULT '',
+            turno VARCHAR(100) DEFAULT '',
             activo TINYINT NOT NULL DEFAULT 1,
             creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -206,16 +209,21 @@ def init_db():
             codigo_orden VARCHAR(50) UNIQUE NOT NULL,
             paciente_id INT NOT NULL,
             usuario_id INT NOT NULL,
+            quimico_id INT NULL,
+            medico_id INT NULL,
             estado_orden VARCHAR(50) NOT NULL DEFAULT 'Pendiente',
             total DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
             metodo_pago VARCHAR(50) DEFAULT 'Efectivo',
             notas_clinicas TEXT,
+            interpretacion_medica TEXT,
             fecha_toma_muestra DATETIME,
             fecha_recepcion_muestra DATETIME,
             fecha_completada DATETIME,
             creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (paciente_id) REFERENCES pacientes (id) ON DELETE RESTRICT,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT,
+            FOREIGN KEY (quimico_id) REFERENCES usuarios (id) ON DELETE SET NULL,
+            FOREIGN KEY (medico_id) REFERENCES usuarios (id) ON DELETE SET NULL
         );
         """)
 
@@ -240,7 +248,10 @@ def init_db():
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             nombre_completo TEXT NOT NULL,
-            rol TEXT NOT NULL CHECK(rol IN ('admin', 'usuario')),
+            rol TEXT NOT NULL CHECK(rol IN ('admin', 'usuario', 'recepcion', 'quimico', 'medico')),
+            cedula_profesional TEXT DEFAULT '',
+            especialidad TEXT DEFAULT '',
+            turno TEXT DEFAULT '',
             activo INTEGER NOT NULL DEFAULT 1,
             creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -286,16 +297,21 @@ def init_db():
             codigo_orden TEXT UNIQUE NOT NULL,
             paciente_id INTEGER NOT NULL,
             usuario_id INTEGER NOT NULL,
+            quimico_id INTEGER,
+            medico_id INTEGER,
             estado_orden TEXT NOT NULL DEFAULT 'Pendiente' CHECK(estado_orden IN ('Pendiente', 'Muestra Recibida', 'En Análisis', 'Completada', 'Cancelada')),
             total REAL NOT NULL DEFAULT 0.0,
             metodo_pago TEXT DEFAULT 'Efectivo',
             notas_clinicas TEXT,
+            interpretacion_medica TEXT,
             fecha_toma_muestra TIMESTAMP,
             fecha_recepcion_muestra TIMESTAMP,
             fecha_completada TIMESTAMP,
             creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (paciente_id) REFERENCES pacientes (id) ON DELETE RESTRICT,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT
+            FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT,
+            FOREIGN KEY (quimico_id) REFERENCES usuarios (id) ON DELETE SET NULL,
+            FOREIGN KEY (medico_id) REFERENCES usuarios (id) ON DELETE SET NULL
         );
         """)
 
@@ -327,26 +343,45 @@ def init_db():
         except Exception:
             pass
 
+    # Migraciones en caliente para columnas de roles específicos (Avance 3 extendido)
+    column_migrations = [
+        "ALTER TABLE usuarios ADD COLUMN cedula_profesional TEXT DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN especialidad TEXT DEFAULT ''",
+        "ALTER TABLE usuarios ADD COLUMN turno TEXT DEFAULT ''",
+        "ALTER TABLE ordenes ADD COLUMN quimico_id INTEGER",
+        "ALTER TABLE ordenes ADD COLUMN medico_id INTEGER",
+        "ALTER TABLE ordenes ADD COLUMN interpretacion_medica TEXT DEFAULT ''"
+    ]
+    for col_mig in column_migrations:
+        try:
+            cursor.execute(col_mig)
+        except Exception:
+            pass
+
     conn.commit()
     conn.close()
 
 def obtener_orden_completa_optimizada(codigo_orden):
-    """Consulta optimizada en una sola ronda relacional con JOIN e índices."""
+    """Consulta optimizada en una sola ronda relacional con JOIN e índices, integrando roles clínicos."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT o.id AS orden_id, o.codigo_orden, o.estado_orden, o.total, o.metodo_pago,
-               o.notas_clinicas, o.fecha_toma_muestra, o.fecha_recepcion_muestra, o.fecha_completada, o.creado_en,
+               o.notas_clinicas, o.interpretacion_medica, o.fecha_toma_muestra, o.fecha_recepcion_muestra, o.fecha_completada, o.creado_en,
                p.id AS paciente_id, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido,
                p.curp AS paciente_curp, p.fecha_nacimiento AS paciente_nacimiento, p.sexo AS paciente_sexo,
                p.telefono AS paciente_telefono, p.email AS paciente_email,
-               u.nombre_completo AS atendido_por,
+               u.nombre_completo AS atendido_por, u.turno AS recepcion_turno,
+               u_qfb.nombre_completo AS quimico_nombre, u_qfb.cedula_profesional AS quimico_cedula,
+               u_med.nombre_completo AS medico_nombre, u_med.cedula_profesional AS medico_cedula, u_med.especialidad AS medico_especialidad,
                oe.id AS oe_id, oe.precio_unitario, oe.estado_estudio, oe.resultado_texto, oe.valores_referencia,
                e.id AS estudio_id, e.codigo AS estudio_codigo, e.nombre AS estudio_nombre,
                e.tipo_muestra, e.indicaciones, e.categoria
         FROM ordenes o
         JOIN pacientes p ON o.paciente_id = p.id
         JOIN usuarios u ON o.usuario_id = u.id
+        LEFT JOIN usuarios u_qfb ON o.quimico_id = u_qfb.id
+        LEFT JOIN usuarios u_med ON o.medico_id = u_med.id
         LEFT JOIN orden_estudios oe ON oe.orden_id = o.id
         LEFT JOIN estudios e ON oe.estudio_id = e.id
         WHERE o.codigo_orden = ?
@@ -365,6 +400,7 @@ def obtener_orden_completa_optimizada(codigo_orden):
         'total': first['total'],
         'metodo_pago': first['metodo_pago'],
         'notas_clinicas': first['notas_clinicas'],
+        'interpretacion_medica': first['interpretacion_medica'] or '',
         'fecha_toma_muestra': first['fecha_toma_muestra'],
         'fecha_recepcion_muestra': first['fecha_recepcion_muestra'],
         'fecha_completada': first['fecha_completada'],
@@ -376,7 +412,13 @@ def obtener_orden_completa_optimizada(codigo_orden):
         'paciente_sexo': first['paciente_sexo'],
         'paciente_telefono': first['paciente_telefono'],
         'paciente_email': first['paciente_email'],
-        'atendido_por': first['atendido_por']
+        'atendido_por': first['atendido_por'],
+        'recepcion_turno': first['recepcion_turno'] or 'Matutino (Ventanilla 1)',
+        'quimico_nombre': first['quimico_nombre'] or '',
+        'quimico_cedula': first['quimico_cedula'] or '',
+        'medico_nombre': first['medico_nombre'] or '',
+        'medico_cedula': first['medico_cedula'] or '',
+        'medico_especialidad': first['medico_especialidad'] or ''
     }
 
     estudios = []

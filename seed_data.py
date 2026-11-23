@@ -7,29 +7,65 @@ def seed_database():
     conn = get_db()
     cursor = conn.cursor()
 
-    # 1. Usuarios con dos roles: admin y usuario (recepción)
+    # 1. Usuarios con roles clínicos específicos (NOM-007-SSA3)
     usuarios = [
         (
             'admin',
             generate_password_hash('admin123'),
-            'QFB. Carlos Méndez (Administrador / Bioquímico)',
+            'QFB. Carlos Méndez',
             'admin',
+            '8472910 UABC',
+            'Dirección General y Aseguramiento de Calidad',
+            'Jornada Administrativa',
             1
         ),
         (
             'recepcion',
             generate_password_hash('recepcion123'),
-            'Laura Morales (Recepcionista / Atención a Pacientes)',
-            'usuario',
+            'Laura Morales',
+            'recepcion',
+            'EMP-0412',
+            'Atención a Pacientes, Admisión y Cobro',
+            'Matutino (Ventanilla 1)',
+            1
+        ),
+        (
+            'quimico',
+            generate_password_hash('quimico123'),
+            'Q.F.B. Roberto Salcedo García',
+            'quimico',
+            '9384721 UABC',
+            'Bioquímica Clínica y Hematología Automatizada',
+            'Laboratorio Analítico Central',
+            1
+        ),
+        (
+            'doctor',
+            generate_password_hash('doctor123'),
+            'Dr. Alejandro Peña Treviño',
+            'medico',
+            'Ced. Méd. 5629143 / Esp. Patología 928371',
+            'Patología Clínica y Diagnóstico de Laboratorio',
+            'Responsable Sanitario y Validación Médica',
             1
         )
     ]
 
     for u in usuarios:
         cursor.execute("""
-            INSERT OR IGNORE INTO usuarios (username, password_hash, nombre_completo, rol, activo)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO usuarios (username, password_hash, nombre_completo, rol, cedula_profesional, especialidad, turno, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, u)
+
+    conn.commit()
+
+    # Mapeo de IDs de usuarios
+    cursor.execute("SELECT id, username FROM usuarios")
+    usuarios_map = {row[1]: row[0] for row in cursor.fetchall()}
+    u_admin_id = usuarios_map.get('admin', 1)
+    u_recepcion_id = usuarios_map.get('recepcion', 2)
+    u_quimico_id = usuarios_map.get('quimico', 1)
+    u_doctor_id = usuarios_map.get('doctor', 1)
 
     # 2. Catálogo de Estudios de Laboratorio Clínico
     estudios = [
@@ -219,24 +255,35 @@ def seed_database():
     yesterday = now - datetime.timedelta(days=1)
     two_days_ago = now - datetime.timedelta(days=2)
 
-    # Orden 1: Completada con resultados listos
+    # Orden 1: Completada con resultados listos y avalada por el médico
     cursor.execute("""
         INSERT OR IGNORE INTO ordenes 
-        (codigo_orden, paciente_id, usuario_id, estado_orden, total, metodo_pago, notas_clinicas, fecha_toma_muestra, fecha_recepcion_muestra, fecha_completada, creado_en)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (codigo_orden, paciente_id, usuario_id, quimico_id, medico_id, estado_orden, total, metodo_pago, notas_clinicas, interpretacion_medica, fecha_toma_muestra, fecha_recepcion_muestra, fecha_completada, creado_en)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         'ORD-2026-1001',
         paciente_ids[0],
         u_recepcion_id,
+        u_quimico_id,
+        u_doctor_id,
         'Completada',
         310.0,
         'Efectivo',
         'Chequeo general de rutina. Paciente en ayunas.',
+        'Parámetros hematológicos y glucémicos dentro de los rangos de referencia esperados para paciente adulto femenino. Sin evidencia de anemia ni alteraciones en la serie blanca. Se avala resultado oficial.',
         two_days_ago.strftime('%Y-%m-%d 08:30:00'),
         two_days_ago.strftime('%Y-%m-%d 09:00:00'),
         yesterday.strftime('%Y-%m-%d 14:00:00'),
         two_days_ago.strftime('%Y-%m-%d 08:15:00')
     ))
+
+    # Actualizar si ya existía para asegurar vinculación con químico y médico
+    cursor.execute("""
+        UPDATE ordenes 
+        SET quimico_id = ?, medico_id = ?, 
+            interpretacion_medica = 'Parámetros hematológicos y glucémicos dentro de los rangos de referencia esperados para paciente adulto femenino. Sin evidencia de anemia ni alteraciones en la serie blanca. Se avala resultado oficial.'
+        WHERE codigo_orden = 'ORD-2026-1001'
+    """, (u_quimico_id, u_doctor_id))
 
     cursor.execute("SELECT id FROM ordenes WHERE codigo_orden = 'ORD-2026-1001'")
     ord1_id = cursor.fetchone()[0]

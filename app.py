@@ -550,10 +550,18 @@ def detalle_orden(id):
                p.email AS paciente_email,
                p.fecha_nacimiento AS paciente_nacimiento,
                p.sexo AS paciente_sexo,
-               u.nombre_completo AS atendido_por
+               u.nombre_completo AS atendido_por,
+               u.turno AS recepcion_turno,
+               u_qfb.nombre_completo AS quimico_nombre,
+               u_qfb.cedula_profesional AS quimico_cedula,
+               u_med.nombre_completo AS medico_nombre,
+               u_med.cedula_profesional AS medico_cedula,
+               u_med.especialidad AS medico_especialidad
         FROM ordenes o
         JOIN pacientes p ON o.paciente_id = p.id
         JOIN usuarios u ON o.usuario_id = u.id
+        LEFT JOIN usuarios u_qfb ON o.quimico_id = u_qfb.id
+        LEFT JOIN usuarios u_med ON o.medico_id = u_med.id
         WHERE o.id = ?
     """, (id,))
     orden = cursor.fetchone()
@@ -617,8 +625,12 @@ def cambiar_estado_orden(id):
                 fecha_recepcion_muestra = ?
             WHERE id = ?
         """, (nuevo_estado, ahora, ahora, id))
+        if session.get('rol') in ['quimico', 'admin']:
+            cursor.execute("UPDATE ordenes SET quimico_id = COALESCE(quimico_id, ?) WHERE id = ?", (session['user_id'], id))
     elif nuevo_estado == 'En Análisis':
         cursor.execute("UPDATE ordenes SET estado_orden = ? WHERE id = ?", (nuevo_estado, id))
+        if session.get('rol') in ['quimico', 'admin']:
+            cursor.execute("UPDATE ordenes SET quimico_id = COALESCE(quimico_id, ?) WHERE id = ?", (session['user_id'], id))
     elif nuevo_estado == 'Completada':
         cursor.execute("""
             UPDATE ordenes 
@@ -655,9 +667,47 @@ def capturar_resultados(id):
                 WHERE id = ? AND orden_id = ?
             """, (resultado_texto, estudio_oe_id, id))
 
+    # Si quien captura es químico o admin, registrarlo en la orden
+    if session.get('rol') in ['quimico', 'admin']:
+        cursor.execute("UPDATE ordenes SET quimico_id = COALESCE(quimico_id, ?) WHERE id = ?", (session['user_id'], id))
+
     conn.commit()
     conn.close()
-    flash('Resultados analíticos guardados correctamente.', 'success')
+    flash('Resultados analíticos guardados correctamente por el laboratorio.', 'success')
+    return redirect(url_for('detalle_orden', id=id))
+
+@app.route('/ordenes/<int:id>/validar-medico', methods=['POST'])
+@login_required
+def validar_medico(id):
+    """Rol de Médico Patólogo: Revisa analitos, escribe dictamen clínico y avala formalmente."""
+    if session.get('rol') not in ['medico', 'admin']:
+        flash('Acceso denegado: Únicamente el Médico Patólogo o Responsable Sanitario puede dictaminar.', 'danger')
+        return redirect(url_for('detalle_orden', id=id))
+
+    interpretacion = request.form.get('interpretacion_medica', '').strip()
+    if not interpretacion:
+        flash('Por favor ingresa la interpretación médica o dictamen diagnóstico antes de firmar.', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+
+    conn = get_db()
+    cursor = conn.cursor()
+    ahora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    cursor.execute("""
+        UPDATE ordenes 
+        SET medico_id = ?,
+            interpretacion_medica = ?,
+            estado_orden = 'Completada',
+            fecha_completada = COALESCE(fecha_completada, ?)
+        WHERE id = ?
+    """, (session['user_id'], interpretacion, ahora, id))
+
+    cursor.execute("UPDATE orden_estudios SET estado_estudio = 'Completado' WHERE orden_id = ?", (id,))
+    conn.commit()
+    conn.close()
+
+    flash('Dictamen clínico emitido y orden avalada con firma médica de Patología Clínica.', 'success')
+    return redirect(url_for('detalle_orden', id=id))
     return redirect(url_for('detalle_orden', id=id))
 
 # ==========================================
@@ -892,6 +942,22 @@ def api_v1_detalle_orden(codigo):
             'financiero': {
                 'total': orden['total'],
                 'metodo_pago': orden['metodo_pago']
+            },
+            'personal_clinico': {
+                'recepcion': {
+                    'nombre': orden.get('atendido_por') or '',
+                    'turno': orden.get('recepcion_turno') or ''
+                },
+                'quimico_analista': {
+                    'nombre': orden.get('quimico_nombre') or '',
+                    'cedula': orden.get('quimico_cedula') or ''
+                },
+                'medico_validador': {
+                    'nombre': orden.get('medico_nombre') or '',
+                    'cedula': orden.get('medico_cedula') or '',
+                    'especialidad': orden.get('medico_especialidad') or '',
+                    'dictamen_medico': orden.get('interpretacion_medica') or ''
+                }
             },
             'estudios': estudios_orden
         }

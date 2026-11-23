@@ -4,12 +4,16 @@ Esta guía está diseñada paso a paso para presentar y defender el sistema **La
 
 ---
 
-## 🔑 1. Credenciales de Acceso (Los 2 Roles Obligatorios)
+## 🔑 1. Credenciales de Acceso (4 Roles Clínicos Específicos NOM-007)
 
-| Rol | Usuario | Contraseña | Permisos y Alcance |
-| :--- | :--- | :--- | :--- |
-| **Administrador / Bioquímico** | `admin` | `admin123` | Control total: altas de pacientes, creación de órdenes, catálogo de estudios, métricas globales, captura de resultados analíticos y cambio de estados. |
-| **Recepcionista / Usuario** | `recepcion` | `recepcion123` | Operación de ventanilla: alta y edición de pacientes, creación de órdenes clínicas y cobro. Acceso denegado a catálogo y tarifas. |
+El sistema implementa separación de responsabilidades clínicas y control de acceso basado en roles (**RBAC**):
+
+| Rol Clínico | Usuario | Contraseña | Nombre y Cédula | Funciones Específicas en el Laboratorio |
+| :--- | :--- | :--- | :--- | :--- |
+| **Médico Patólogo / Validador (El Doctor)** | `doctor` | `doctor123` | **Dr. Alejandro Peña Treviño**<br>Ced. Méd. `5629143`<br>Esp. Patología `928371` | **Revisión, Dictamen y Liberación:** Evalúa los hallazgos capturados por el químico, escribe la **Interpretación Diagnóstica / Dictamen Médico** y firma oficialmente la orden para autorizar su entrega. |
+| **Químico Analista (Q.F.B. / Laboratorista)** | `quimico` | `quimico123` | **Q.F.B. Roberto Salcedo García**<br>Ced. Prof. `9384721` UABC | **Procesamiento de Muestras:** Recibe la muestra biológica en laboratorio, opera los analizadores y captura los valores analíticos medidos (analitos, unidades y rangos de referencia). |
+| **Recepcionista / Admisión y Caja** | `recepcion` | `recepcion123` | **Laura Morales**<br>Turno: `Matutino (Ventanilla 1)`<br>No. Emp: `EMP-0412` | **Ventanilla y Cobro:** Registro de pacientes, validación de CURP y domicilio, generación de órdenes clínicas, cobro y entrega de folio al paciente. Acceso denegado a catálogo y dictámenes. |
+| **Director General / Administrador** | `admin` | `admin123` | **QFB. Carlos Méndez**<br>Dirección General | **Administración Global:** Gestión del catálogo de estudios clínicos, tarifas, altas de personal, configuración y visualización de métricas generales. |
 
 ---
 
@@ -42,43 +46,44 @@ Abre en tu navegador:
 
 ---
 
-### Paso 2: El Acceso al Panel Administrativo y Roles
+### Paso 2: El Acceso al Panel y Demostración de Roles
 1. Baja hasta el final de la página o da clic en el botón superior **"Acceso Personal"** (`/login`).
-2. **Prueba de Rol Limitado (Recepcionista):**
-   * Ingresa con `recepcion` / `recepcion123`.
-   * Muestra que puede registrar órdenes y pacientes, pero si intenta ir a `/estudios/nuevo` el sistema le deniega el acceso (`403 Forbidden`).
-3. **Prueba de Administrador:**
-   * Cierra sesión (`/logout`) y entra con `admin` / `admin123`.
-   * Muestra el Dashboard principal con las tarjetas de métricas en tiempo real.
+2. **Los 4 Roles Disponibles:** En la pantalla de login verás los 4 botones de acceso rápido:
+   * **Recepcionista (`recepcion`):** Crea órdenes y pacientes, pero no puede modificar precios ni dictaminar (`403 Forbidden`).
+   * **Químico (`quimico`):** Recibe muestras y captura parámetros analíticos.
+   * **Médico Patólogo (`doctor`):** Revisa hallazgos analíticos, redacta el dictamen clínico e interpretación diagnóstica y avala formalmente.
+   * **Director General (`admin`):** Administrador del sistema con acceso completo.
 
 ---
 
-### Paso 3: El Proceso de Negocio Completo (Flujo de Vida de una Orden)
-Demuestra el ciclo clínico completo:
+### Paso 3: El Proceso de Negocio Completo (Flujo de Vida Clínico)
+Demuestra el ciclo clínico completo con los 3 actores de laboratorio:
 
-#### A. Registro de Paciente con Validaciones:
-1. Ve a **Pacientes $\rightarrow$ Nuevo Paciente**.
-2. **Validación de Código Postal:** En Código Postal escribe `22000` o `22400` y muestra cómo autocompleta la colonia, municipio y estado mediante la API externa.
-3. **Validación de CURP:** Escribe una CURP errónea (ej. `HOLA123`) para mostrar el rechazo. Luego ingresa una válida de 18 caracteres (ej. `GOMA010101HBCRLA01`).
-4. Guarda el paciente.
+#### A. Recepcionista (Ventanilla y Admisión):
+1. Entra como `recepcion` / `recepcion123`.
+2. Ve a **Pacientes $\rightarrow$ Nuevo Paciente**: Pon el CP `22000` (se autocompleta con API) y escribe una CURP válida (ej. `GOMA010101HBCRLA01`).
+3. Ve a **Órdenes $\rightarrow$ Nueva Orden**: Selecciona al paciente, marca 2 estudios (se calcula el total en vivo) y genera la orden. Se registrará: *"Atendido por Laura Morales (Turno Matutino - Ventanilla 1)"*.
 
-#### B. Generación de Orden Clínica:
-1. Ve a **Órdenes $\rightarrow$ Nueva Orden**.
-2. Selecciona al paciente recién creado.
-3. Marca varios estudios (ej. *Biometría Hemática* y *Examen General de Orina*).
-4. Muestra cómo el subtotal y total se calculan solos dinámicamente.
-5. Selecciona método de pago (*Efectivo / Tarjeta / Transferencia*) y crea la orden.
+#### B. Químico Analista (Procesamiento de Muestras):
+1. Entra como `quimico` / `quimico123`.
+2. Entra al detalle de la orden. Clic en **"Recibir Muestra en Laboratorio"** $\rightarrow$ Estado avanza a **`Muestra Recibida`**.
+3. Clic en **"Iniciar Análisis Clínico"** $\rightarrow$ Estado avanza a **`En Análisis`**.
+4. En la tabla de estudios, captura los hallazgos analíticos (ej. *Hemoglobina: 14.2 g/dL*, *Glucosa: 88.5 mg/dL*) y da clic en **"Guardar Parámetros (Laboratorio)"**. La muestra queda firmada técnicamente por el Q.F.B. Roberto Salcedo con Cédula `9384721`.
 
-#### C. Trazabilidad de Muestra Biológica:
-1. En el detalle de la orden recién creada, muestra el estado inicial: **`Pendiente`**.
-2. Clic en **"Recibir Muestra en Laboratorio"** $\rightarrow$ El sistema marca la fecha y hora exacta de recepción y avanza a **`Muestra Recibida`**.
-3. Clic en **"Iniciar Análisis Clínico"** $\rightarrow$ El estado avanza a **`En Análisis`**.
+#### C. Médico Patólogo Validador (El Doctor - Dictamen Clínico):
+1. Entra como `doctor` / `doctor123`.
+2. Abre la orden. En la parte inferior verás el **Módulo Médico: Dictamen Diagnóstico e Interpretación Médica**.
+3. En el cuadro de texto escribe la conclusión médica:
+   *Ejemplo: "Serie eritrocitaria y leucocitaria dentro de parámetros fisiológicos normales. Glucemia en ayuno normal. Sin evidencia de anomalías patológicas agudas."*
+4. Da clic en el botón rojo: **"Firmar y Avalar Médicamente"**.
+5. La orden queda formalmente en estado **`Completada`**, avalada por el Dr. Alejandro Peña Treviño con Cédula `5629143` y Especialidad en Patología Clínica `928371`.
 
-#### D. Captura de Resultados Analíticos:
-1. En la parte inferior aparece el formulario de captura exclusivo para el Bioquímico.
-2. Ingresa los valores de prueba (ej. `14.2 g/dL`).
-3. Guarda los resultados y cambia el estado a **`Completada`**.
-4. Clic en **"Imprimir Reporte"** para mostrar la hoja membretada con los resultados finales.
+#### D. Reporte Impreso Oficial (Doble Firma):
+1. Da clic en **"Imprimir Reporte"** (o consulta el folio desde la página de inicio).
+2. Muestra la hoja clínica oficial:
+   * **Datos de Recepción:** Nombre de la recepcionista y turno de ventanilla.
+   * **Recuadro de Dictamen Médico:** El diagnóstico redactado por el doctor.
+   * **Doble Firma Digital:** Sello criptográfico, firma técnica del Químico Q.F.B. y firma médica del Patólogo Responsable Sanitario con sus respectivas cédulas profesionales.
 
 ---
 

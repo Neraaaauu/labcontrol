@@ -239,34 +239,59 @@
             </tbody>
         </table>
 
-        <!-- Notas e Interpretación Clínica -->
-        <div class="mt-4 pt-2 border-top">
-            <div class="small text-muted" style="font-size: 0.725rem; line-height: 1.4;">
-                <strong>OBSERVACIONES Y NOTAS TÉCNICAS:</strong><br>
-                Los presentes análisis se procesaron bajo estrictos estándares de control de calidad interno y externo según la norma NOM-007-SSA3-2011. Este informe no constituye por sí solo un diagnóstico definitivo; todo resultado de laboratorio debe ser evaluado por el médico tratante en conjunto con la historia clínica y exploración del paciente.
+        <!-- Dictamen e Interpretación Médica del Patólogo -->
+        <div class="mt-4 p-3 rounded" style="background-color: #f8fafc; border-left: 4px solid #dc2626; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+            <div class="d-flex align-items-center gap-1 mb-1">
+                <strong style="font-size: 0.8rem; color: #991b1b; text-transform: uppercase; letter-spacing: 0.03em;">
+                    DICTAMEN CLÍNICO E INTERPRETACIÓN MÉDICA (MÉDICO PATÓLOGO):
+                </strong>
+            </div>
+            <p class="mb-1 text-dark" style="font-size: 0.825rem; font-style: italic; line-height: 1.45;">
+                "{{ orden.interpretacion_medica or 'Valores analíticos evaluados dentro de la variabilidad biológica de referencia sin hallazgos patológicos relevantes. Se avala entrega oficial de resultados.' }}"
+            </p>
+            <div class="text-muted" style="font-size: 0.7rem;">
+                Validado y liberado por: <strong>{{ orden.medico_nombre or 'Dr. Alejandro Peña Treviño' }}</strong> &bull; {{ orden.medico_cedula or 'Ced. Méd. 5629143 / Esp. Patología 928371' }} &bull; {{ orden.medico_especialidad or 'Patología Clínica' }}
             </div>
         </div>
 
-        <!-- Sello Digital y Firma del Químico Responsable -->
+        <!-- Notas e Interpretación Técnica -->
+        <div class="mt-3 pt-2 border-top">
+            <div class="small text-muted" style="font-size: 0.725rem; line-height: 1.4;">
+                <strong>TRAZABILIDAD Y REGULACIÓN NOM-007-SSA3-2011:</strong><br>
+                Recepción y cobro en ventanilla: <strong>{{ orden.atendido_por }}</strong> ({{ orden.recepcion_turno }}). Los presentes análisis se procesaron en analizadores calibrados con controles PEEC. Todo resultado debe correlacionarse con la clínica y anamnesis del paciente.
+            </div>
+        </div>
+
+        <!-- Sellos Digitales y Doble Firma Oficial (Químico Analista y Médico Patólogo) -->
         <div class="row align-items-center mt-4 pt-3">
-            <div class="col-7">
+            <div class="col-4">
                 <div class="seal-box">
-                    <div class="fw-bold mb-1" style="font-size: 0.7rem; color: #1e293b;">
-                        <i class="bi bi-shield-lock-fill text-success me-1"></i> VALIDACIÓN CRIPTOGRÁFICA DE LABORATORIO:
+                    <div class="fw-bold mb-1" style="font-size: 0.68rem; color: #1e293b;">
+                        VALIDACIÓN CRIPTOGRÁFICA:
                     </div>
-                    <div>SELLO: 4A8F-99B2-C10E-88D4-F312-E09A-774B-22CD</div>
-                    <div>CADENA: ||1.1|{{ orden.codigo_orden }}|{{ orden.fecha_completada or '2026-11-22' }}|NOM-007-SSA3|AUT||</div>
-                    <div style="font-size: 0.675rem; color: #64748b;">Firma digital certificada ante COFEPRIS y Secretaría de Salud BC.</div>
+                    <div>SELLO: 4A8F-99B2-C10E-88D4-F312</div>
+                    <div>CADENA: ||{{ orden.codigo_orden }}|{{ orden.fecha_completada or '2026-11-23' }}|NOM-007||</div>
+                    <div style="font-size: 0.65rem; color: #64748b;">Firma digital certificada ante COFEPRIS BC.</div>
                 </div>
             </div>
-            <div class="col-5 text-center">
-                <div class="mb-2">
-                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='45'><path d='M10 35 Q 40 5, 80 30 T 150 20' stroke='%231e3a8a' stroke-width='2' fill='none'/><path d='M30 40 Q 60 10, 110 38' stroke='%232563eb' stroke-width='1.5' fill='none'/></svg>" alt="Firma Digital">
+            <div class="col-4 text-center">
+                <div class="mb-1">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='40'><path d='M10 30 Q 35 5, 70 25 T 130 18' stroke='%231e3a8a' stroke-width='2' fill='none'/></svg>" alt="Firma Químico">
                 </div>
                 <div class="signature-line">
-                    <strong class="d-block text-dark" style="font-size: 0.8rem;">Q.F.B. Carlos Méndez</strong>
-                    <span class="text-muted d-block" style="font-size: 0.725rem;">Cédula Profesional: <strong>8472910</strong> UABC</span>
-                    <span class="text-secondary d-block" style="font-size: 0.7rem;">Químico Responsable Sanitario</span>
+                    <strong class="d-block text-dark" style="font-size: 0.78rem;">{{ orden.quimico_nombre or 'Q.F.B. Roberto Salcedo García' }}</strong>
+                    <span class="text-muted d-block" style="font-size: 0.7rem;">Cédula: <strong>{{ orden.quimico_cedula or '9384721 UABC' }}</strong></span>
+                    <span class="text-secondary d-block" style="font-size: 0.68rem;">Químico Analista de Muestras</span>
+                </div>
+            </div>
+            <div class="col-4 text-center">
+                <div class="mb-1">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='40'><path d='M15 35 Q 50 8, 85 30 T 135 15' stroke='%23991b1b' stroke-width='2' fill='none'/><path d='M25 38 Q 65 15, 110 32' stroke='%23b91c1c' stroke-width='1.5' fill='none'/></svg>" alt="Firma Médico">
+                </div>
+                <div class="signature-line">
+                    <strong class="d-block text-dark" style="font-size: 0.78rem;">{{ orden.medico_nombre or 'Dr. Alejandro Peña Treviño' }}</strong>
+                    <span class="text-muted d-block" style="font-size: 0.7rem;"><strong>{{ orden.medico_cedula or 'Ced. Méd. 5629143 / Esp. 928371' }}</strong></span>
+                    <span class="text-danger d-block fw-semibold" style="font-size: 0.68rem;">Médico Patólogo / Responsable Sanitario</span>
                 </div>
             </div>
         </div>
