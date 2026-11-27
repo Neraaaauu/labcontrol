@@ -87,7 +87,7 @@
                             <span class="text-muted small font-tabular">{{ est.tipo_muestra }}</span>
                         </div>
 
-                        {% if est.resultado_texto %}
+                        {% if est.resultado_texto and orden.estado_orden == 'Completada' %}
                         <div class="mt-2 p-2 rounded bg-light border small">
                             <div class="text-muted fw-semibold mb-1" style="font-size: 0.75rem; text-transform: uppercase;">
                                 Parámetros Analíticos Validados:

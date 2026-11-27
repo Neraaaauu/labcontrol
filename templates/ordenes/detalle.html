@@ -89,7 +89,8 @@
             Actualizar estado operativo:
         </span>
         <div class="d-flex flex-wrap gap-2">
-            {% if orden.estado_orden == 'Pendiente' %}
+            {% set rol = session.get('rol') %}
+            {% if orden.estado_orden == 'Pendiente' and rol in ['recepcion', 'quimico', 'admin'] %}
             <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
                 <input type="hidden" name="nuevo_estado" value="Muestra Recibida">
                 <button type="submit" class="btn btn-sm btn-subtle">
@@ -98,7 +99,7 @@
             </form>
             {% endif %}
 
-            {% if orden.estado_orden in ['Pendiente', 'Muestra Recibida'] %}
+            {% if orden.estado_orden == 'Muestra Recibida' and rol in ['quimico', 'admin'] %}
             <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
                 <input type="hidden" name="nuevo_estado" value="En Análisis">
                 <button type="submit" class="btn btn-sm btn-subtle">
@@ -107,17 +108,14 @@
             </form>
             {% endif %}
 
-            {% if orden.estado_orden != 'Completada' %}
-            <form method="POST" action="{{ url_for('cambiar_estado_orden', id=orden.id) }}" class="d-inline">
-                <input type="hidden" name="nuevo_estado" value="Completada">
-                <button type="submit" class="btn btn-sm btn-steel">
-                    Marcar como Completada
-                </button>
-            </form>
-            {% else %}
+            {% if orden.estado_orden == 'Completada' %}
             <span class="badge-status badge-status-completada py-1 px-2">
                 Orden cerrada y finalizada
             </span>
+            {% elif orden.estado_orden == 'Cancelada' %}
+            <span class="badge-status py-1 px-2">Orden cancelada</span>
+            {% elif orden.estado_orden == 'En Análisis' %}
+            <span class="small text-muted" style="font-size: 0.8rem;">Se completa cuando el médico firma el dictamen.</span>
             {% endif %}
         </div>
     </div>
@@ -217,6 +215,7 @@
             </div>
 
             <div class="p-3">
+                {% set puede_capturar = orden.estado_orden == 'En Análisis' and session.get('rol') in ['quimico', 'admin'] %}
                 <form method="POST" action="{{ url_for('capturar_resultados', id=orden.id) }}">
                     <div class="table-responsive">
                         <table class="table-clinical">
@@ -243,7 +242,7 @@
                                     </td>
                                     <td class="text-end font-tabular">${{ "%.2f"|format(item.precio_unitario) }}</td>
                                     <td style="min-width: 240px;">
-                                        <textarea class="form-control form-control-sm mb-1" name="resultado_{{ item.id }}" rows="2" placeholder="Hallazgos analíticos...">{{ item.resultado_texto or '' }}</textarea>
+                                        <textarea class="form-control form-control-sm mb-1" name="resultado_{{ item.id }}" rows="2" placeholder="{{ 'Hallazgos analíticos...' if puede_capturar else 'Sin resultado' }}" {% if not puede_capturar %}readonly{% endif %}>{{ item.resultado_texto or '' }}</textarea>
                                         {% if item.valores_referencia %}
                                         <small class="text-muted d-block fst-italic" style="font-size: 0.75rem;">Ref: {{ item.valores_referencia }}</small>
                                         {% endif %}
@@ -255,12 +254,19 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
+                        {% if puede_capturar %}
                         <span class="small text-muted" style="font-size: 0.8rem;">
-                            Los resultados guardados se reflejan inmediatamente en la consulta del paciente.
+                            Los resultados se publican al paciente cuando el médico firma la orden.
                         </span>
                         <button type="submit" class="btn btn-sm btn-steel">
                             Guardar Parámetros (Laboratorio)
                         </button>
+                        {% else %}
+                        <span class="small text-muted" style="font-size: 0.8rem;">
+                            {% if orden.estado_orden == 'Completada' %}Orden firmada: los resultados ya no se pueden modificar.
+                            {% else %}El Químico Analista captura resultados cuando la orden está "En Análisis".{% endif %}
+                        </span>
+                        {% endif %}
                     </div>
                 </form>
 
@@ -284,7 +290,7 @@
                         {% endif %}
                     </div>
 
-                    {% if session.get('rol') in ['medico', 'admin'] %}
+                    {% if session.get('rol') in ['medico', 'admin'] and orden.estado_orden == 'En Análisis' %}
                     <form method="POST" action="{{ url_for('validar_medico', id=orden.id) }}" class="mt-2">
                         <div class="mb-2">
                             <label for="interpretacion_medica" class="form-label small text-muted">
@@ -311,7 +317,7 @@
                         </div>
                         {% else %}
                         <div class="p-2 bg-light rounded border text-muted small mt-2">
-                            <i class="bi bi-info-circle me-1"></i> Los analitos están registrados. En espera de revisión y dictamen por el <strong>Médico Patólogo</strong>.
+                            <i class="bi bi-info-circle me-1"></i> En espera de revisión y dictamen por el <strong>Médico Patólogo</strong> (se firma cuando la orden está "En Análisis" y tiene todos sus resultados).
                         </div>
                         {% endif %}
                     {% endif %}

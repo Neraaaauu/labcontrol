@@ -155,11 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
         items.forEach(item => {
             const nombre = item.getAttribute('data-nombre');
             const cat = item.getAttribute('data-categoria');
-            if (nombre.includes(query) || cat.includes(query)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
+            // d-none (Bootstrap) es necesario: la clase d-flex usa !important y gana a style.display
+            item.classList.toggle('d-none', !(nombre.includes(query) || cat.includes(query)));
         });
     });
 

@@ -129,7 +129,7 @@
                             </div>
                             <div class="col-sm-6 col-md-3">
                                 <span class="text-muted d-block">CURP:</span>
-                                <span class="font-monospace fw-semibold">{{ orden.paciente_curp or 'No registrada' }}</span>
+                                <span class="font-monospace fw-semibold">{{ orden.paciente_curp|ocultar_curp or 'No registrada' }}</span>
                             </div>
                             <div class="col-sm-6 col-md-3">
                                 <span class="text-muted d-block">Fecha de Toma:</span>
@@ -217,7 +217,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if est.resultado_texto %}
+                                        {% if est.resultado_texto and orden.estado_orden == 'Completada' %}
                                             <div class="p-2 rounded-3 bg-light border font-monospace small text-dark mb-1">
                                                 {{ est.resultado_texto }}
                                             </div>

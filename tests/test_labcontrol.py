@@ -129,7 +129,11 @@ def test_creacion_orden_y_calculo_total(client):
 
     assert res.status_code == 200
     assert b"ORD-2026-" in res.data
-    assert b"$600.00" in res.data or b"600" in res.data
+    # El total guardado debe ser exactamente la suma de los precios del catálogo (220 + 380)
+    conn = database.get_db()
+    orden = conn.execute("SELECT total FROM ordenes ORDER BY id DESC LIMIT 1").fetchone()
+    conn.close()
+    assert float(orden['total']) == 600.0
 
 def test_flujo_transicion_muestras_y_resultados(client):
     """Verifica la demostración principal: de muestra recibida a análisis y completada."""
@@ -140,10 +144,21 @@ def test_flujo_transicion_muestras_y_resultados(client):
     assert res.status_code == 200
     assert b"En An" in res.data
 
-    # Pasar a 'Completada'
-    res2 = client.post('/ordenes/3/estado', data={'nuevo_estado': 'Completada'}, follow_redirects=True)
+    # Capturar resultados de todos los estudios de la orden 3
+    conn = database.get_db()
+    estudios = conn.execute("SELECT id FROM orden_estudios WHERE orden_id = 3").fetchall()
+    conn.close()
+    client.post('/ordenes/3/capturar-resultados',
+                data={f"resultado_{e['id']}": 'Valor de prueba' for e in estudios})
+
+    # La orden se completa con la firma del médico (admin también puede firmar)
+    res2 = client.post('/ordenes/3/validar-medico',
+                       data={'interpretacion_medica': 'Sin hallazgos relevantes.'}, follow_redirects=True)
     assert res2.status_code == 200
-    assert b"Completada" in res2.data
+    conn = database.get_db()
+    estado = conn.execute("SELECT estado_orden FROM ordenes WHERE id = 3").fetchone()['estado_orden']
+    conn.close()
+    assert estado == 'Completada'
 
 def test_consulta_publica_por_codigo(client):
     """Verifica búsqueda por código de orden en portal de consulta."""
@@ -259,7 +274,19 @@ def test_rol_medico_dictamen_y_restriccion_recepcion(client):
     res_rec = client.post('/ordenes/2/validar-medico', data={
         'interpretacion_medica': 'Dictamen no autorizado por recepcionista'
     }, follow_redirects=True)
-    assert b"Acceso denegado" in res_rec.data or b"Pat" in res_rec.data
+    assert b"Acceso denegado" in res_rec.data
+    conn = database.get_db()
+    assert conn.execute("SELECT medico_id FROM ordenes WHERE id = 2").fetchone()['medico_id'] is None
+    conn.close()
+    client.get('/logout')
+
+    # El químico captura todos los resultados (requisito para poder firmar)
+    client.post('/login', data={'username': 'quimico', 'password': 'quimico123'})
+    conn = database.get_db()
+    estudios = conn.execute("SELECT id FROM orden_estudios WHERE orden_id = 2").fetchall()
+    conn.close()
+    client.post('/ordenes/2/capturar-resultados',
+                data={f"resultado_{e['id']}": 'Dentro de rango' for e in estudios})
     client.get('/logout')
 
     # Caso 2: Médico Patólogo emite dictamen clínico oficial -> Aceptado
@@ -269,3 +296,69 @@ def test_rol_medico_dictamen_y_restriccion_recepcion(client):
     }, follow_redirects=True)
     assert res_doc.status_code == 200
     assert b"Dictamen" in res_doc.data and b"avalada" in res_doc.data
+
+
+# ==============================================================================
+# PRUEBAS DE LA ENTREGA FINAL: REGLAS DE ROLES, ESTADOS Y PRIVACIDAD
+# ==============================================================================
+
+def _estado(orden_id):
+    conn = database.get_db()
+    fila = conn.execute("SELECT estado_orden, medico_id FROM ordenes WHERE id = ?", (orden_id,)).fetchone()
+    conn.close()
+    return fila['estado_orden'], fila['medico_id']
+
+def test_recepcion_no_completa_ni_captura_resultados(client):
+    """Recepción no puede completar una orden ni capturar resultados (eso es del químico y del médico)."""
+    client.post('/login', data={'username': 'recepcion', 'password': 'recepcion123'})
+    client.post('/ordenes/3/estado', data={'nuevo_estado': 'Completada'})
+    assert _estado(3)[0] == 'Muestra Recibida'
+
+    res = client.post('/ordenes/2/capturar-resultados', data={'resultado_3': 'NO AUTORIZADO'}, follow_redirects=True)
+    assert b"Acceso denegado" in res.data
+    conn = database.get_db()
+    assert conn.execute("SELECT resultado_texto FROM orden_estudios WHERE id = 3").fetchone()['resultado_texto'] != 'NO AUTORIZADO'
+    conn.close()
+
+def test_medico_no_firma_sin_muestra_ni_resultados(client):
+    """El médico no puede firmar una orden Pendiente ni una que tenga resultados sin capturar."""
+    client.post('/login', data={'username': 'doctor', 'password': 'doctor123'})
+    client.post('/ordenes/4/validar-medico', data={'interpretacion_medica': 'Intento indebido'})
+    assert _estado(4) == ('Pendiente', None)
+
+    res = client.post('/ordenes/2/validar-medico', data={'interpretacion_medica': 'Faltan resultados'}, follow_redirects=True)
+    assert b"faltan resultados" in res.data
+    assert _estado(2) == ('En Análisis', None)
+
+def test_orden_completada_queda_cerrada(client):
+    """Una orden completada no regresa a otro estado y sus resultados ya no se pueden editar."""
+    client.post('/login', data={'username': 'admin', 'password': 'admin123'})
+    client.post('/ordenes/1/estado', data={'nuevo_estado': 'Pendiente'})
+    assert _estado(1)[0] == 'Completada'
+
+    conn = database.get_db()
+    oe = conn.execute("SELECT id, resultado_texto FROM orden_estudios WHERE orden_id = 1").fetchone()
+    conn.close()
+    client.post('/ordenes/1/capturar-resultados', data={f"resultado_{oe['id']}": 'CAMBIO TARDIO'})
+    conn = database.get_db()
+    assert conn.execute("SELECT resultado_texto FROM orden_estudios WHERE id = ?", (oe['id'],)).fetchone()['resultado_texto'] == oe['resultado_texto']
+    conn.close()
+
+def test_reporte_preliminar_no_inventa_resultados(client):
+    """El reporte de una orden sin firma se marca como preliminar, sin resultados inventados, sin firmas y con CURP oculta."""
+    res = client.get('/consultar/reporte/ORD-2026-1002')
+    assert res.status_code == 200
+    assert b"PRELIMINAR" in res.data
+    assert b"rangos normales" not in res.data
+    assert b"VALIDADO" not in res.data
+    assert b"Alejandro Pe" not in res.data
+    assert b"HEVR920722HBCRBN03" not in res.data  # CURP completa del paciente no debe aparecer
+
+def test_privacidad_dev_login_y_api_publica(client):
+    """La ruta /dev-login está desactivada y la API pública no expone la CURP ni el teléfono completos."""
+    res = client.get('/dev-login/admin')
+    assert res.status_code == 404
+
+    data = client.get('/api/v1/ordenes/ORD-2026-1001').get_json()['data']['paciente']
+    assert '*' in data['curp']
+    assert data['telefono'] is None

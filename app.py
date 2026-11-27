@@ -56,6 +56,31 @@ def validar_telefono_formato(tel):
 # DECORADORES DE SEGURIDAD Y ROLES
 # ==========================================
 
+def ocultar_curp(curp):
+    """Oculta la CURP en vistas públicas: solo deja visibles los primeros 4 caracteres."""
+    if not curp:
+        return curp
+    curp = str(curp)
+    return curp[:4] + '*' * (len(curp) - 4)
+
+app.jinja_env.filters['ocultar_curp'] = ocultar_curp
+
+# Transiciones permitidas en la ruta de cambio de estado: {estado_actual: {nuevo_estado: roles}}
+# 'Completada' NO está aquí: una orden solo se completa cuando el médico firma el dictamen.
+TRANSICIONES_ESTADO = {
+    'Pendiente': {
+        'Muestra Recibida': ['recepcion', 'quimico', 'admin'],
+        'Cancelada': ['recepcion', 'admin'],
+    },
+    'Muestra Recibida': {
+        'En Análisis': ['quimico', 'admin'],
+        'Cancelada': ['recepcion', 'admin'],
+    },
+    'En Análisis': {
+        'Cancelada': ['admin'],
+    },
+}
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -605,14 +630,30 @@ def cambiar_estado_orden(id):
         return redirect(url_for('lista_ordenes'))
 
     estado_actual = orden_db['estado_orden']
-    if estado_actual == 'Cancelada' and nuevo_estado != 'Cancelada':
+    rol = session.get('rol')
+
+    if estado_actual in ['Completada', 'Cancelada']:
         conn.close()
-        flash('Una orden cancelada no puede cambiar de estado.', 'danger')
+        flash(f'La orden ya está "{estado_actual}" y no puede cambiar de estado.', 'danger')
         return redirect(url_for('detalle_orden', id=id))
 
-    if nuevo_estado == 'Completada' and estado_actual not in ['En Análisis', 'Muestra Recibida', 'Completada']:
+    if nuevo_estado == 'Completada':
         conn.close()
-        flash('No se puede completar una orden sin antes haber recibido la muestra biológica en laboratorio.', 'warning')
+        if estado_actual == 'Pendiente':
+            flash('No se puede completar una orden sin antes haber recibido la muestra biológica en laboratorio.', 'warning')
+        else:
+            flash('La orden se completa cuando el Médico Patólogo firma el dictamen.', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+
+    permitidos = TRANSICIONES_ESTADO.get(estado_actual, {})
+    if nuevo_estado not in permitidos:
+        conn.close()
+        flash(f'No se puede pasar de "{estado_actual}" a "{nuevo_estado}".', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+
+    if rol not in permitidos[nuevo_estado]:
+        conn.close()
+        flash(f'Acceso denegado: tu rol no puede cambiar la orden a "{nuevo_estado}".', 'danger')
         return redirect(url_for('detalle_orden', id=id))
 
     ahora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -653,8 +694,22 @@ def cambiar_estado_orden(id):
 @app.route('/ordenes/<int:id>/capturar-resultados', methods=['POST'])
 @login_required
 def capturar_resultados(id):
+    if session.get('rol') not in ['quimico', 'admin']:
+        flash('Acceso denegado: únicamente el Químico Analista puede capturar resultados.', 'danger')
+        return redirect(url_for('detalle_orden', id=id))
+
     conn = get_db()
     cursor = conn.cursor()
+    cursor.execute("SELECT estado_orden FROM ordenes WHERE id = ?", (id,))
+    orden_db = cursor.fetchone()
+    if not orden_db:
+        conn.close()
+        flash('Orden de laboratorio no encontrada.', 'danger')
+        return redirect(url_for('lista_ordenes'))
+    if orden_db['estado_orden'] != 'En Análisis':
+        conn.close()
+        flash('Solo se pueden capturar resultados cuando la orden está "En Análisis".', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
 
     # Recorrer los resultados enviados en el formulario
     for key, value in request.form.items():
@@ -691,6 +746,25 @@ def validar_medico(id):
 
     conn = get_db()
     cursor = conn.cursor()
+    cursor.execute("SELECT estado_orden FROM ordenes WHERE id = ?", (id,))
+    orden_db = cursor.fetchone()
+    if not orden_db:
+        conn.close()
+        flash('Orden de laboratorio no encontrada.', 'danger')
+        return redirect(url_for('lista_ordenes'))
+    if orden_db['estado_orden'] != 'En Análisis':
+        conn.close()
+        flash('Solo se puede firmar una orden que está "En Análisis" (con muestra recibida y procesada).', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+    cursor.execute("""
+        SELECT COUNT(*) AS faltantes FROM orden_estudios
+        WHERE orden_id = ? AND (resultado_texto IS NULL OR TRIM(resultado_texto) = '')
+    """, (id,))
+    if cursor.fetchone()['faltantes'] > 0:
+        conn.close()
+        flash('No se puede firmar: faltan resultados por capturar en uno o más estudios.', 'warning')
+        return redirect(url_for('detalle_orden', id=id))
+
     ahora = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     cursor.execute("""
@@ -702,12 +776,11 @@ def validar_medico(id):
         WHERE id = ?
     """, (session['user_id'], interpretacion, ahora, id))
 
-    cursor.execute("UPDATE orden_estudios SET estado_estudio = 'Completado' WHERE orden_id = ?", (id,))
+    cursor.execute("UPDATE orden_estudios SET estado_estudio = 'Completada' WHERE orden_id = ?", (id,))
     conn.commit()
     conn.close()
 
     flash('Dictamen clínico emitido y orden avalada con firma médica de Patología Clínica.', 'success')
-    return redirect(url_for('detalle_orden', id=id))
     return redirect(url_for('detalle_orden', id=id))
 
 # ==========================================
@@ -739,7 +812,7 @@ def reporte_publico_impreso(codigo):
     if not orden:
         flash('La orden solicitada no existe o el folio es inválido.', 'danger')
         return redirect(url_for('index'))
-    return render_template('ordenes/reporte_impreso.html', orden=orden, estudios_orden=estudios_orden)
+    return render_template('ordenes/reporte_impreso.html', orden=orden, estudios_orden=estudios_orden, publico=True)
 
 # ==========================================
 # CATÁLOGO DE ESTUDIOS
@@ -929,9 +1002,9 @@ def api_v1_detalle_orden(codigo):
             'paciente': {
                 'id': orden['paciente_id'],
                 'nombre_completo': orden['paciente_nombre'],
-                'curp': orden['paciente_curp'],
+                'curp': orden['paciente_curp'] if 'user_id' in session else ocultar_curp(orden['paciente_curp']),
                 'sexo': orden['paciente_sexo'],
-                'telefono': orden['paciente_telefono']
+                'telefono': orden['paciente_telefono'] if 'user_id' in session else None
             },
             'fechas': {
                 'creado_en': orden['creado_en'],
@@ -1076,7 +1149,10 @@ def api_v1_metricas():
 
 @app.route('/dev-login/<role>')
 def dev_login(role):
-    """Ruta auxiliar para automatización de capturas y evaluación local."""
+    """Ruta auxiliar para automatización de capturas. Desactivada salvo que se
+    defina la variable de entorno LABCONTROL_DEV_LOGIN=1 (nunca en uso real)."""
+    if os.environ.get('LABCONTROL_DEV_LOGIN') != '1':
+        abort(404)
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM usuarios WHERE rol = ? AND activo = 1 LIMIT 1", (role,))
@@ -1088,7 +1164,9 @@ def dev_login(role):
         session['username'] = user['username']
         session['nombre_completo'] = user['nombre_completo']
         session['rol'] = user['rol']
-    dest = request.args.get('next', url_for('dashboard'))
+    dest = request.args.get('next', '')
+    if not dest.startswith('/') or dest.startswith('//'):
+        dest = url_for('dashboard')
     return redirect(dest)
 
 if __name__ == '__main__':
